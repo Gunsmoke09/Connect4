@@ -74,10 +74,11 @@ class Program
             var player = game.CurrentPlayer;
             Console.WriteLine();
             game.DisplayBoard();
+            bool win;
             if (player.IsComputer)
             {
                 Console.WriteLine("Computer thinking...");
-                bool win = game.ComputerTurn();
+                win = game.ComputerTurn();
                 if (win)
                 {
                     game.DisplayBoard();
@@ -127,7 +128,7 @@ class Program
                 continue;
             }
             DiscType type = ParseDiscType(typeChar);
-            bool win = game.DropDisc(player, type, column - 1, true);
+            win = game.DropDisc(player, type, column - 1, true);
             if (!win && game.BoardFull())
             {
                 game.DisplayBoard();
