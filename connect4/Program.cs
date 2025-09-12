@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Connect4;
 
@@ -40,188 +41,170 @@ class Program
     static Game StartNew()
     {
         Console.WriteLine("Select mode: 1) Human vs Human 2) Human vs Computer");
-        int modeSel = ReadInt(1, 2);
+        int modeSel;
+        while (true)
+        {
+            string? s = Console.ReadLine();
+            if (int.TryParse(s, out modeSel) && modeSel >= 1 && modeSel <= 2) break;
+            Console.WriteLine("Enter number between 1 and 2");
+        }
         GameMode mode = modeSel == 1 ? GameMode.HumanVsHuman : GameMode.HumanVsComputer;
 
         Console.WriteLine("Enter rows (>=6):");
-        int rows = ReadInt(6, 100);
+        int rows;
+        while (true)
+        {
+            string? s = Console.ReadLine();
+            if (int.TryParse(s, out rows) && rows >= 6 && rows <= 100) break;
+            Console.WriteLine("Enter number between 6 and 100");
+        }
         Console.WriteLine("Enter columns (>=7 and >=rows):");
         int cols;
         while (true)
         {
-            cols = ReadInt(7, 100);
-            if (cols >= rows) break;
-            Console.WriteLine("Columns must be >= rows");
+            string? s = Console.ReadLine();
+            if (int.TryParse(s, out cols) && cols >= 7 && cols <= 100 && cols >= rows) break;
+            Console.WriteLine("Columns must be >= rows and between 7 and 100");
         }
         return new Game(rows, cols, mode);
     }
 
-    static int ReadInt(int min, int max)
-    {
-        while (true)
-        {
-            string? s = Console.ReadLine();
-            int v = 0;
-            int.TryParse(s, out v);
-            if (int.TryParse(s, out int v2)) v = v2;
-            if (v >= min && v <= max)
-                return v;
-            Console.WriteLine($"Enter number between {min} and {max}");
-        }
-    }
-
     static void PlayGame(Game game)
     {
+        var rng = new Random();
         while (true)
         {
             var player = game.CurrentPlayer;
             Console.WriteLine();
-            game.DisplayBoard();
-            ShowHud(game);
+            GridHelper.Display(game.Board, game.Rows, game.Columns);
+            Player p1 = game.CurrentPlayer.Id == PlayerId.One ? game.CurrentPlayer : game.OtherPlayer;
+            Player p2 = game.CurrentPlayer.Id == PlayerId.Two ? game.CurrentPlayer : game.OtherPlayer;
+            Console.WriteLine($"Player 1 (X) — Ordinary: {p1.Ordinary}, Boring: {p1.Boring}, Magnetic: {p1.Magnetic}");
+            Console.WriteLine($"Player 2 (O) — Ordinary: {p2.Ordinary}, Boring: {p2.Boring}, Magnetic: {p2.Magnetic}");
             bool win;
             if (player.IsComputer)
             {
                 Console.WriteLine("Computer thinking...");
-                win = game.ComputerTurn();
+                var types = new List<DiscType>();
+                if (player.HasDisc(DiscType.Ordinary)) types.Add(DiscType.Ordinary);
+                if (player.HasDisc(DiscType.Boring)) types.Add(DiscType.Boring);
+                if (player.HasDisc(DiscType.Magnetic)) types.Add(DiscType.Magnetic);
+                DiscType t = types[rng.Next(types.Count)];
+                int chosen;
+                if (t == DiscType.Boring)
+                {
+                    chosen = rng.Next(game.Columns);
+                }
+                else
+                {
+                    var cols = new List<int>();
+                    for (int c = 0; c < game.Columns; c++)
+                    {
+                        if (game.Board[game.Rows - 1, c] == ' ') cols.Add(c);
+                    }
+                    if (cols.Count == 0) return;
+                    chosen = cols[rng.Next(cols.Count)];
+                }
+                win = game.DropDisc(player, t, chosen, true);
                 if (win)
                 {
-                    game.DisplayBoard();
+                    GridHelper.Display(game.Board, game.Rows, game.Columns);
                     Console.WriteLine($"Player {(int)player.Id + 1} wins!");
                     return;
                 }
                 if (game.BoardFull())
                 {
-                    game.DisplayBoard();
+                    GridHelper.Display(game.Board, game.Rows, game.Columns);
                     Console.WriteLine("It's a draw.");
                     return;
                 }
-                game.SwitchPlayer();
+                game.CurrentPlayerIndex = 1 - game.CurrentPlayerIndex;
                 continue;
             }
 
             DiscType type;
             int column;
-            if (!TryGetValidMove(game, player, out type, out column)) return;
+            while (true)
+            {
+                Console.WriteLine($"Player {(int)player.Id + 1} turn. Enter move (e.g., O4, B3, M5) or 'save <file>' or 'help':");
+                string? input = Console.ReadLine();
+                if (input == null) continue;
+                input = input.Trim();
+                if (input.StartsWith("save"))
+                {
+                    var parts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length == 2)
+                    {
+                        game.Save(parts[1]);
+                        Console.WriteLine("Game saved.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Usage: save filename");
+                    }
+                    continue;
+                }
+                if (input == "help")
+                {
+                    Console.WriteLine("Commands:");
+                    Console.WriteLine("O# - ordinary disc in column #");
+                    Console.WriteLine("B# - boring disc in column # (removes column)");
+                    Console.WriteLine("M# - magnetic disc in column # (lifts own disc)");
+                    Console.WriteLine("save <file> - save game");
+                    Console.WriteLine("help - show this help");
+                    Console.WriteLine("exit - quit");
+                    continue;
+                }
+                if (input == "exit") return;
+                if (input.Length < 2)
+                {
+                    Console.WriteLine("Invalid input");
+                    continue;
+                }
+                char typeChar = input[0];
+                if (!int.TryParse(input.Substring(1), out int colInput))
+                {
+                    Console.WriteLine("Invalid column");
+                    continue;
+                }
+                char up = char.ToUpperInvariant(typeChar);
+                DiscType t = DiscType.Ordinary;
+                if (up == 'B') t = DiscType.Boring; else if (up == 'M') t = DiscType.Magnetic;
+                int col = colInput - 1;
+                if (col < 0 || col >= game.Columns)
+                {
+                    Console.WriteLine($"⚠️ Invalid column. Please enter a number between 1 and {game.Columns}.");
+                    continue;
+                }
+                if (game.Board[game.Rows - 1, col] != ' ' && t != DiscType.Boring)
+                {
+                    Console.WriteLine("⚠️ That column is full. Choose another column.");
+                    continue;
+                }
+                if (!player.HasDisc(t))
+                {
+                    Console.WriteLine($"⚠️ You have no {t.ToString().ToUpperInvariant()} discs left. Choose a disc type you still have.");
+                    continue;
+                }
+                type = t;
+                column = col;
+                break;
+            }
             win = game.DropDisc(player, type, column, true);
             if (!win && game.BoardFull())
             {
-                game.DisplayBoard();
+                GridHelper.Display(game.Board, game.Rows, game.Columns);
                 Console.WriteLine("It's a draw.");
                 return;
             }
             if (win)
             {
-                game.DisplayBoard();
+                GridHelper.Display(game.Board, game.Rows, game.Columns);
                 Console.WriteLine($"Player {(int)player.Id + 1} wins!");
                 return;
             }
-            game.SwitchPlayer();
+            game.CurrentPlayerIndex = 1 - game.CurrentPlayerIndex;
         }
-    }
-
-    static bool TryGetValidMove(Game game, Player player, out DiscType disc, out int column)
-    {
-        while (true)
-        {
-            Console.WriteLine($"Player {(int)player.Id + 1} turn. Enter move (e.g., O4, B3, M5) or 'save <file>' or 'help':");
-            string? input = Console.ReadLine();
-            if (input == null)
-            {
-                disc = DiscType.Ordinary; column = 0; continue;
-            }
-            input = input.Trim();
-            if (input.StartsWith("save"))
-            {
-                var parts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length == 2)
-                {
-                    game.Save(parts[1]);
-                    Console.WriteLine("Game saved.");
-                }
-                else Console.WriteLine("Usage: save filename");
-                continue;
-            }
-            if (input == "help")
-            {
-                ShowHelp();
-                continue;
-            }
-            if (input == "exit")
-            {
-                disc = DiscType.Ordinary; column = 0; return false;
-            }
-            if (input.Length < 2)
-            {
-                Console.WriteLine("Invalid input");
-                continue;
-            }
-            char typeChar = input[0];
-            if (!int.TryParse(input.Substring(1), out int colInput))
-            {
-                Console.WriteLine("Invalid column");
-                continue;
-            }
-            DiscType type = ParseDiscType(typeChar);
-            int col = colInput - 1;
-            if (col < 0 || col >= game.Columns)
-            {
-                Console.WriteLine($"⚠️ Invalid column. Please enter a number between 1 and {game.Columns}.");
-                continue;
-            }
-            if (game.ColumnFull(col) && type != DiscType.Boring)
-            {
-                Console.WriteLine("⚠️ That column is full. Choose another column.");
-                continue;
-            }
-            if (!player.HasDisc(type))
-            {
-                Console.WriteLine($"⚠️ You have no {type.ToString().ToUpperInvariant()} discs left. Choose a disc type you still have.");
-                continue;
-            }
-            disc = type;
-            column = col;
-            return true;
-        }
-    }
-
-    static char SymbolFor(PlayerId id) => id == PlayerId.One ? 'X' : 'O';
-
-    static void ShowHud(Game game)
-    {
-        Player p1 = game.CurrentPlayer.Id == PlayerId.One ? game.CurrentPlayer : game.OtherPlayer;
-        Player p2 = game.CurrentPlayer.Id == PlayerId.Two ? game.CurrentPlayer : game.OtherPlayer;
-        Console.WriteLine($"Player 1 ({SymbolFor(PlayerId.One)}) — Ordinary: {p1.Ordinary}, Boring: {p1.Boring}, Magnetic: {p1.Magnetic}");
-        Console.WriteLine($"Player 2 ({SymbolFor(PlayerId.Two)}) — Ordinary: {p2.Ordinary}, Boring: {p2.Boring}, Magnetic: {p2.Magnetic}");
-    }
-
-    static DiscType ParseDiscType(char c)
-    {
-        char up = char.ToUpperInvariant(c);
-        DiscType t = DiscType.Ordinary;
-        if (up == 'O')
-        {
-            t = DiscType.Ordinary;
-        }
-        else if (up == 'B')
-        {
-            t = DiscType.Boring;
-        }
-        else if (up == 'M')
-        {
-            t = DiscType.Magnetic;
-        }
-        return t;
-    }
-
-    static void ShowHelp()
-    {
-        Console.WriteLine("Commands:");
-        Console.WriteLine("O# - ordinary disc in column #");
-        Console.WriteLine("B# - boring disc in column # (removes column)");
-        Console.WriteLine("M# - magnetic disc in column # (lifts own disc)");
-        Console.WriteLine("save <file> - save game");
-        Console.WriteLine("help - show this help");
-        Console.WriteLine("exit - quit");
     }
 
     static void RunTest(string sequence)
@@ -235,22 +218,24 @@ class Program
             char typeChar = trimmed[0];
             if (!int.TryParse(trimmed.Substring(1), out int col)) continue;
             var player = game.CurrentPlayer;
-            DiscType type = ParseDiscType(typeChar);
+            char up = char.ToUpperInvariant(typeChar);
+            DiscType type = DiscType.Ordinary;
+            if (up == 'B') type = DiscType.Boring; else if (up == 'M') type = DiscType.Magnetic;
             bool win = game.DropDisc(player, type, col - 1, false);
             if (win)
             {
-                game.DisplayBoard();
+                GridHelper.Display(game.Board, game.Rows, game.Columns);
                 Console.WriteLine($"Player {(int)player.Id + 1} wins.");
                 return;
             }
             if (game.BoardFull())
             {
-                game.DisplayBoard();
+                GridHelper.Display(game.Board, game.Rows, game.Columns);
                 Console.WriteLine("Draw.");
                 return;
             }
-            game.SwitchPlayer();
+            game.CurrentPlayerIndex = 1 - game.CurrentPlayerIndex;
         }
-        game.DisplayBoard();
+        GridHelper.Display(game.Board, game.Rows, game.Columns);
     }
 }
