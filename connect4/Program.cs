@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using LineUp;
+using Connect4;
 
 class Program
 {
@@ -13,7 +13,7 @@ class Program
             return;
         }
 
-        Console.WriteLine("Welcome to LineUp!");
+        Console.WriteLine("Welcome to Connect4!");
         Console.WriteLine("Load game? (y/n)");
         string? choice = Console.ReadLine();
         Game game;

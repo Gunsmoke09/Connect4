@@ -1,0 +1,15 @@
+/Users/anant/Desktop/Uni/IFN584/Assignment/init/connect4/connect4/bin/Debug/net8.0/connect4
+/Users/anant/Desktop/Uni/IFN584/Assignment/init/connect4/connect4/bin/Debug/net8.0/connect4.deps.json
+/Users/anant/Desktop/Uni/IFN584/Assignment/init/connect4/connect4/bin/Debug/net8.0/connect4.runtimeconfig.json
+/Users/anant/Desktop/Uni/IFN584/Assignment/init/connect4/connect4/bin/Debug/net8.0/connect4.dll
+/Users/anant/Desktop/Uni/IFN584/Assignment/init/connect4/connect4/bin/Debug/net8.0/connect4.pdb
+/Users/anant/Desktop/Uni/IFN584/Assignment/init/connect4/connect4/obj/Debug/net8.0/connect4.GeneratedMSBuildEditorConfig.editorconfig
+/Users/anant/Desktop/Uni/IFN584/Assignment/init/connect4/connect4/obj/Debug/net8.0/connect4.AssemblyInfoInputs.cache
+/Users/anant/Desktop/Uni/IFN584/Assignment/init/connect4/connect4/obj/Debug/net8.0/connect4.AssemblyInfo.cs
+/Users/anant/Desktop/Uni/IFN584/Assignment/init/connect4/connect4/obj/Debug/net8.0/connect4.csproj.CoreCompileInputs.cache
+/Users/anant/Desktop/Uni/IFN584/Assignment/init/connect4/connect4/obj/Debug/net8.0/connect4.sourcelink.json
+/Users/anant/Desktop/Uni/IFN584/Assignment/init/connect4/connect4/obj/Debug/net8.0/connect4.dll
+/Users/anant/Desktop/Uni/IFN584/Assignment/init/connect4/connect4/obj/Debug/net8.0/refint/connect4.dll
+/Users/anant/Desktop/Uni/IFN584/Assignment/init/connect4/connect4/obj/Debug/net8.0/connect4.pdb
+/Users/anant/Desktop/Uni/IFN584/Assignment/init/connect4/connect4/obj/Debug/net8.0/connect4.genruntimeconfig.cache
+/Users/anant/Desktop/Uni/IFN584/Assignment/init/connect4/connect4/obj/Debug/net8.0/ref/connect4.dll

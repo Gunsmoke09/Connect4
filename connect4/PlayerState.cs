@@ -1,4 +1,4 @@
-namespace LineUp
+namespace Connect4
 {
     public class PlayerState
     {
