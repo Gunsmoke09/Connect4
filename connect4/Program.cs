@@ -61,7 +61,10 @@ class Program
         while (true)
         {
             string? s = Console.ReadLine();
-            if (int.TryParse(s, out int v) && v >= min && v <= max)
+            int v = 0;
+            int.TryParse(s, out v);
+            if (int.TryParse(s, out int v2)) v = v2;
+            if (v >= min && v <= max)
                 return v;
             Console.WriteLine($"Enter number between {min} and {max}");
         }
@@ -193,13 +196,21 @@ class Program
 
     static DiscType ParseDiscType(char c)
     {
-        return char.ToUpperInvariant(c) switch
+        char up = char.ToUpperInvariant(c);
+        DiscType t = DiscType.Ordinary;
+        if (up == 'O')
         {
-            'O' => DiscType.Ordinary,
-            'B' => DiscType.Boring,
-            'M' => DiscType.Magnetic,
-            _ => DiscType.Ordinary
-        };
+            t = DiscType.Ordinary;
+        }
+        else if (up == 'B')
+        {
+            t = DiscType.Boring;
+        }
+        else if (up == 'M')
+        {
+            t = DiscType.Magnetic;
+        }
+        return t;
     }
 
     static void ShowHelp()

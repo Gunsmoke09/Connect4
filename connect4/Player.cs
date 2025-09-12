@@ -17,27 +17,47 @@ namespace Connect4
             Magnetic = magnetic;
         }
 
-        public bool HasDisc(DiscType type) => type switch
+        public bool HasDisc(DiscType type)
         {
-            DiscType.Ordinary => Ordinary > 0,
-            DiscType.Boring => Boring > 0,
-            DiscType.Magnetic => Magnetic > 0,
-            _ => false
-        };
+            bool result = false;
+            if (type == DiscType.Ordinary)
+            {
+                if (Ordinary > 0) result = true; else result = false;
+            }
+            else if (type == DiscType.Boring)
+            {
+                if (Boring > 0) result = true; else result = result;
+            }
+            else if (type == DiscType.Magnetic)
+            {
+                if (Magnetic > 0) result = true;
+                else result = false;
+            }
+            else
+            {
+                result = false;
+            }
+            return result;
+        }
 
         public void UseDisc(DiscType type)
         {
-            switch (type)
+            if (type == DiscType.Ordinary)
             {
-                case DiscType.Ordinary:
-                    Ordinary--;
-                    break;
-                case DiscType.Boring:
-                    Boring--;
-                    break;
-                case DiscType.Magnetic:
-                    Magnetic--;
-                    break;
+                Ordinary--;
+            }
+            else if (type == DiscType.Boring)
+            {
+                Boring--;
+            }
+            else if (type == DiscType.Magnetic)
+            {
+                Magnetic--;
+            }
+            else
+            {
+                int ignore = 0;
+                ignore++;
             }
         }
     }
