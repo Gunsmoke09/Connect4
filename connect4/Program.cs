@@ -74,6 +74,7 @@ class Program
             var player = game.CurrentPlayer;
             Console.WriteLine();
             game.DisplayBoard();
+            ShowHud(game);
             bool win;
             if (player.IsComputer)
             {
@@ -95,9 +96,36 @@ class Program
                 continue;
             }
 
+            DiscType type;
+            int column;
+            if (!TryGetValidMove(game, player, out type, out column)) return;
+            win = game.DropDisc(player, type, column, true);
+            if (!win && game.BoardFull())
+            {
+                game.DisplayBoard();
+                Console.WriteLine("It's a draw.");
+                return;
+            }
+            if (win)
+            {
+                game.DisplayBoard();
+                Console.WriteLine($"Player {(int)player.Id + 1} wins!");
+                return;
+            }
+            game.SwitchPlayer();
+        }
+    }
+
+    static bool TryGetValidMove(Game game, Player player, out DiscType disc, out int column)
+    {
+        while (true)
+        {
             Console.WriteLine($"Player {(int)player.Id + 1} turn. Enter move (e.g., O4, B3, M5) or 'save <file>' or 'help':");
             string? input = Console.ReadLine();
-            if (input == null) continue;
+            if (input == null)
+            {
+                disc = DiscType.Ordinary; column = 0; continue;
+            }
             input = input.Trim();
             if (input.StartsWith("save"))
             {
@@ -115,34 +143,52 @@ class Program
                 ShowHelp();
                 continue;
             }
-            if (input == "exit") return;
+            if (input == "exit")
+            {
+                disc = DiscType.Ordinary; column = 0; return false;
+            }
             if (input.Length < 2)
             {
                 Console.WriteLine("Invalid input");
                 continue;
             }
             char typeChar = input[0];
-            if (!int.TryParse(input.Substring(1), out int column))
+            if (!int.TryParse(input.Substring(1), out int colInput))
             {
                 Console.WriteLine("Invalid column");
                 continue;
             }
             DiscType type = ParseDiscType(typeChar);
-            win = game.DropDisc(player, type, column - 1, true);
-            if (!win && game.BoardFull())
+            int col = colInput - 1;
+            if (col < 0 || col >= game.Columns)
             {
-                game.DisplayBoard();
-                Console.WriteLine("It's a draw.");
-                return;
+                Console.WriteLine($"⚠️ Invalid column. Please enter a number between 1 and {game.Columns}.");
+                continue;
             }
-            if (win)
+            if (game.ColumnFull(col) && type != DiscType.Boring)
             {
-                game.DisplayBoard();
-                Console.WriteLine($"Player {(int)player.Id + 1} wins!");
-                return;
+                Console.WriteLine("⚠️ That column is full. Choose another column.");
+                continue;
             }
-            game.SwitchPlayer();
+            if (!player.HasDisc(type))
+            {
+                Console.WriteLine($"⚠️ You have no {type.ToString().ToUpperInvariant()} discs left. Choose a disc type you still have.");
+                continue;
+            }
+            disc = type;
+            column = col;
+            return true;
         }
+    }
+
+    static char SymbolFor(PlayerId id) => id == PlayerId.One ? 'X' : 'O';
+
+    static void ShowHud(Game game)
+    {
+        Player p1 = game.CurrentPlayer.Id == PlayerId.One ? game.CurrentPlayer : game.OtherPlayer;
+        Player p2 = game.CurrentPlayer.Id == PlayerId.Two ? game.CurrentPlayer : game.OtherPlayer;
+        Console.WriteLine($"Player 1 ({SymbolFor(PlayerId.One)}) — Ordinary: {p1.Ordinary}, Boring: {p1.Boring}, Magnetic: {p1.Magnetic}");
+        Console.WriteLine($"Player 2 ({SymbolFor(PlayerId.Two)}) — Ordinary: {p2.Ordinary}, Boring: {p2.Boring}, Magnetic: {p2.Magnetic}");
     }
 
     static DiscType ParseDiscType(char c)

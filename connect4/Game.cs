@@ -34,7 +34,7 @@ namespace LineUp
             int perPlayer = totalCells / 2;
             int specials = 2; // Boring and Magnetic
             int ordinary = perPlayer - specials * 2; // two of each special
-            players[0] = new Player(PlayerId.One, mode == GameMode.HumanVsComputer ? false : false, ordinary, 2, 2);
+            players[0] = new Player(PlayerId.One, false, ordinary, 2, 2);
             players[1] = new Player(PlayerId.Two, mode == GameMode.HumanVsComputer, ordinary, 2, 2);
         }
 
@@ -60,12 +60,14 @@ namespace LineUp
             }
         }
 
+        private char SymbolFor(PlayerId id) => id == PlayerId.One ? 'X' : 'O';
+
         private char CharFor(Player player, DiscType type)
         {
             bool p1 = player.Id == PlayerId.One;
             return type switch
             {
-                DiscType.Ordinary => p1 ? '@' : '#',
+                DiscType.Ordinary => SymbolFor(player.Id),
                 DiscType.Boring => p1 ? 'B' : 'b',
                 DiscType.Magnetic => p1 ? 'M' : 'm',
                 _ => ' '
@@ -74,7 +76,7 @@ namespace LineUp
 
         private bool IsPlayerChar(char c, PlayerId player)
         {
-            return player == PlayerId.One ? c == '@' || c == 'B' || c == 'M' : c == '#' || c == 'b' || c == 'm';
+            return player == PlayerId.One ? c == 'X' || c == 'B' || c == 'M' : c == 'O' || c == 'b' || c == 'm';
         }
 
         public bool ColumnFull(int column)
@@ -96,9 +98,14 @@ namespace LineUp
         {
             if (column < 0 || column >= Columns) return false;
             if (!player.HasDisc(type)) return false;
-            if (ColumnFull(column)) return false;
 
             int row = FindRow(column);
+            if (row == -1)
+            {
+                if (type != DiscType.Boring) return false;
+                row = Rows - 1;
+            }
+
             char discChar = CharFor(player, type);
             board[row, column] = discChar;
             player.UseDisc(type);
@@ -108,12 +115,14 @@ namespace LineUp
             {
                 ApplyBoring(player, column, row);
                 if (showFrames) DisplayBoard();
+                board[0, column] = SymbolFor(player.Id);
                 row = 0;
             }
             else if (type == DiscType.Magnetic)
             {
                 ApplyMagnetic(player, column, row);
                 if (showFrames) DisplayBoard();
+                board[row, column] = SymbolFor(player.Id);
             }
 
             bool win = CheckWin(row, column, player.Id);
@@ -125,9 +134,9 @@ namespace LineUp
             for (int r = 0; r < row; r++)
             {
                 char existing = board[r, column];
-                if (existing == '@' || existing == '#' || existing == 'B' || existing == 'b' || existing == 'M' || existing == 'm')
+                if (existing == 'X' || existing == 'O' || existing == 'B' || existing == 'b' || existing == 'M' || existing == 'm')
                 {
-                    PlayerId owner = existing == '@' || existing == 'B' || existing == 'M' ? PlayerId.One : PlayerId.Two;
+                    PlayerId owner = existing == 'X' || existing == 'B' || existing == 'M' ? PlayerId.One : PlayerId.Two;
                     players[(int)owner].Ordinary++;
                 }
                 board[r, column] = ' ';
