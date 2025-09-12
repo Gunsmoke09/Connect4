@@ -7,64 +7,6 @@ using System.Text.Json;
 
 namespace LineUp
 {
-    public enum DiscType
-    {
-        Ordinary,
-        Boring,
-        Magnetic
-    }
-
-    public enum PlayerId
-    {
-        One = 0,
-        Two = 1
-    }
-
-    public enum GameMode
-    {
-        HumanVsHuman,
-        HumanVsComputer
-    }
-
-    public class Player
-    {
-        public PlayerId Id { get; }
-        public bool IsComputer { get; }
-        public int Ordinary { get; set; }
-        public int Boring { get; set; }
-        public int Magnetic { get; set; }
-
-        public Player(PlayerId id, bool computer, int ordinary, int boring, int magnetic)
-        {
-            Id = id;
-            IsComputer = computer;
-            Ordinary = ordinary;
-            Boring = boring;
-            Magnetic = magnetic;
-        }
-
-        public bool HasDisc(DiscType type)
-        {
-            return type switch
-            {
-                DiscType.Ordinary => Ordinary > 0,
-                DiscType.Boring => Boring > 0,
-                DiscType.Magnetic => Magnetic > 0,
-                _ => false
-            };
-        }
-
-        public void UseDisc(DiscType type)
-        {
-            switch (type)
-            {
-                case DiscType.Ordinary: Ordinary--; break;
-                case DiscType.Boring: Boring--; break;
-                case DiscType.Magnetic: Magnetic--; break;
-            }
-        }
-    }
-
     public class Game
     {
         public int Rows { get; }
@@ -329,24 +271,5 @@ namespace LineUp
             return false;
         }
 
-        // game state classes for serialization
-        public class GameState
-        {
-            public int Rows { get; set; }
-            public int Columns { get; set; }
-            public string[] Board { get; set; }
-            public PlayerState[] Players { get; set; }
-            public int CurrentPlayer { get; set; }
-            public GameMode Mode { get; set; }
-        }
-
-        public class PlayerState
-        {
-            public PlayerId Id { get; set; }
-            public bool IsComputer { get; set; }
-            public int Ordinary { get; set; }
-            public int Boring { get; set; }
-            public int Magnetic { get; set; }
-        }
     }
 }
