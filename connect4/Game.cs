@@ -60,53 +60,46 @@ namespace Connect4
             }
         }
 
-        private char SymbolFor(PlayerId id) => id == PlayerId.One ? 'X' : 'O';
-
-        private char CharFor(Player player, DiscType type)
-        {
-            bool p1 = player.Id == PlayerId.One;
-            return type switch
-            {
-                DiscType.Ordinary => SymbolFor(player.Id),
-                DiscType.Boring => p1 ? 'B' : 'b',
-                DiscType.Magnetic => p1 ? 'M' : 'm',
-                _ => ' '
-            };
-        }
-
-        private bool IsPlayerChar(char c, PlayerId player)
-        {
-            return player == PlayerId.One ? c == 'X' || c == 'B' || c == 'M' : c == 'O' || c == 'b' || c == 'm';
-        }
-
         public bool ColumnFull(int column)
         {
             return board[Rows - 1, column] != ' ';
         }
 
-        private int FindRow(int column)
-        {
-            for (int r = 0; r < Rows; r++)
-            {
-                if (board[r, column] == ' ')
-                    return r;
-            }
-            return -1;
-        }
-
         public bool DropDisc(Player player, DiscType type, int column, bool showFrames)
         {
             if (column < 0 || column >= Columns) return false;
+            if (column < 0 || column >= Columns) return false;
             if (!player.HasDisc(type)) return false;
 
-            int row = FindRow(column);
+            int row = -1;
+            for (int r = 0; r < Rows; r++)
+            {
+                if (board[r, column] == ' ')
+                {
+                    row = r;
+                    break;
+                }
+            }
             if (row == -1)
             {
                 if (type != DiscType.Boring) return false;
                 row = Rows - 1;
             }
 
-            char discChar = CharFor(player, type);
+            char discChar = ' ';
+            if (type == DiscType.Ordinary)
+            {
+                discChar = player.Id == PlayerId.One ? 'X' : 'O';
+            }
+            else if (type == DiscType.Boring)
+            {
+                discChar = player.Id == PlayerId.One ? 'B' : 'b';
+            }
+            else if (type == DiscType.Magnetic)
+            {
+                discChar = player.Id == PlayerId.One ? 'M' : 'm';
+            }
+
             board[row, column] = discChar;
             player.UseDisc(type);
             if (showFrames) DisplayBoard();
@@ -115,14 +108,14 @@ namespace Connect4
             {
                 ApplyBoring(player, column, row);
                 if (showFrames) DisplayBoard();
-                board[0, column] = SymbolFor(player.Id);
+                board[0, column] = player.Id == PlayerId.One ? 'X' : 'O';
                 row = 0;
             }
             else if (type == DiscType.Magnetic)
             {
                 ApplyMagnetic(player, column, row);
                 if (showFrames) DisplayBoard();
-                board[row, column] = SymbolFor(player.Id);
+                board[row, column] = player.Id == PlayerId.One ? 'X' : 'O';
             }
 
             bool win = CheckWin(row, column, player.Id);
@@ -142,7 +135,8 @@ namespace Connect4
                 board[r, column] = ' ';
             }
             board[row, column] = ' ';
-            board[0, column] = CharFor(player, DiscType.Boring);
+            char boringChar = player.Id == PlayerId.One ? 'B' : 'b';
+            board[0, column] = boringChar;
         }
 
         private void ApplyMagnetic(Player player, int column, int row)
@@ -150,7 +144,9 @@ namespace Connect4
             int target = -1;
             for (int r = row - 1; r >= 0; r--)
             {
-                if (IsPlayerChar(board[r, column], player.Id))
+                char ch = board[r, column];
+                bool mine = player.Id == PlayerId.One ? (ch == 'X' || ch == 'B' || ch == 'M') : (ch == 'O' || ch == 'b' || ch == 'm');
+                if (mine)
                 {
                     target = r;
                     break;
@@ -177,24 +173,29 @@ namespace Connect4
             foreach (var d in dirs)
             {
                 int count = 1;
-                count += CountDir(row, column, d[0], d[1], player);
-                count += CountDir(row, column, -d[0], -d[1], player);
+                int r = row + d[0];
+                int c = column + d[1];
+                while (r >= 0 && r < Rows && c >= 0 && c < Columns)
+                {
+                    char ch = board[r, c];
+                    bool match = player == PlayerId.One ? ch == 'X' || ch == 'B' || ch == 'M' : ch == 'O' || ch == 'b' || ch == 'm';
+                    if (match) count++; else break;
+                    r += d[0];
+                    c += d[1];
+                }
+                r = row - d[0];
+                c = column - d[1];
+                while (r >= 0 && r < Rows && c >= 0 && c < Columns)
+                {
+                    char ch = board[r, c];
+                    bool match = player == PlayerId.One ? ch == 'X' || ch == 'B' || ch == 'M' : ch == 'O' || ch == 'b' || ch == 'm';
+                    if (match) count++; else break;
+                    r -= d[0];
+                    c -= d[1];
+                }
                 if (count >= ConnectN) return true;
             }
             return false;
-        }
-
-        private int CountDir(int row, int col, int dr, int dc, PlayerId player)
-        {
-            int r = row + dr;
-            int c = col + dc;
-            int count = 0;
-            while (r >= 0 && r < Rows && c >= 0 && c < Columns)
-            {
-                if (IsPlayerChar(board[r, c], player)) count++; else break;
-                r += dr; c += dc;
-            }
-            return count;
         }
 
         public bool BoardFull()
@@ -254,13 +255,25 @@ namespace Connect4
             var validCols = new List<int>();
             for (int c = 0; c < Columns; c++)
             {
-                if (!ColumnFull(c) && player.HasDisc(DiscType.Ordinary)) validCols.Add(c);
+                if (board[Rows - 1, c] == ' ')
+                {
+                    if (player.HasDisc(DiscType.Ordinary)) validCols.Add(c);
+                }
             }
             int chosen = -1;
             foreach (var col in validCols)
             {
-                int row = FindRow(col);
-                board[row, col] = CharFor(player, DiscType.Ordinary);
+                int row = -1;
+                for (int r = 0; r < Rows; r++)
+                {
+                    if (board[r, col] == ' ')
+                    {
+                        row = r;
+                        break;
+                    }
+                }
+                char tmp = player.Id == PlayerId.One ? 'X' : 'O';
+                board[row, col] = tmp;
                 bool win = CheckWin(row, col, player.Id);
                 board[row, col] = ' ';
                 if (win)
