@@ -7,7 +7,6 @@ namespace Connect4
     {
         public int Rows { get; }
         public int Columns { get; }
-        public int ConnectN { get; }
         public _GameMode Mode { get; }
 
         private readonly char[,] board;
@@ -20,7 +19,6 @@ namespace Connect4
             Rows = rows;
             Columns = columns;
             Mode = mode;
-            ConnectN = 4;
             board = RenderGrid.GenBoard(Rows, Columns);
 
             int totalCells = rows * columns;
@@ -154,7 +152,7 @@ namespace Connect4
                 if (match) count++; else break;
                 r--;
             }
-            if (count >= ConnectN) return true;
+            if (count >= 4) return true;
 
             count = 1;
             int c = column + 1;
@@ -173,7 +171,7 @@ namespace Connect4
                 if (match) count++; else break;
                 c--;
             }
-            if (count >= ConnectN) return true;
+            if (count >= 4) return true;
 
             count = 1;
             r = row + 1;
@@ -196,7 +194,7 @@ namespace Connect4
                 r--;
                 c--;
             }
-            if (count >= ConnectN) return true;
+            if (count >= 4) return true;
 
             count = 1;
             r = row + 1;
@@ -219,7 +217,7 @@ namespace Connect4
                 r--;
                 c++;
             }
-            return count >= ConnectN;
+            return count >= 4;
         }
 
         public bool BoardFull()
