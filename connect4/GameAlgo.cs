@@ -74,7 +74,7 @@ namespace Connect4
 
             board[row, column] = discChar;
             player.UseDisc(type);
-            if (showFrames) RenderGrid.Display(board, Rows, Columns);
+            if (showFrames) RenderGrid.PrintBoard(board, Rows, Columns);
 
             if (type == _DiscType.Boring)
             {
@@ -91,7 +91,7 @@ namespace Connect4
                 board[row, column] = ' ';
                 char boringChar = player.Id == _PlayerId.One ? 'B' : 'b';
                 board[0, column] = boringChar;
-                if (showFrames) RenderGrid.Display(board, Rows, Columns);
+                if (showFrames) RenderGrid.PrintBoard(board, Rows, Columns);
                 board[0, column] = player.Id == _PlayerId.One ? '@' : '#';
                 row = 0;
             }
@@ -115,7 +115,7 @@ namespace Connect4
                     board[target, column] = above;
                     board[target + 1, column] = below;
                 }
-                if (showFrames) RenderGrid.Display(board, Rows, Columns);
+                if (showFrames) RenderGrid.PrintBoard(board, Rows, Columns);
                 board[row, column] = player.Id == _PlayerId.One ? '@' : '#';
             }
 

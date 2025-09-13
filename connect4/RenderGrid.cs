@@ -11,20 +11,20 @@ namespace Connect4
             {
                 for (int c = 0; c < cols; c++)
                 {
-                    board[r, c] = ' '; // empty cells to start with
+                    board[r, c] = ' '; // empty cells to start with, if do it in one step then it would be '\0' character
                 }
             }
             return board;
         }
 
-        public static void Display(char[,] board, int rows, int columns)
+        public static void PrintBoard(char[,] board, int rows, int columns)
         {
             for (int r = rows - 1; r >= 0; r--) // print from top row to bottom
             {
                 for (int c = 0; c < columns; c++)
                 {
                     Console.Write("| ");
-                    Console.Write(board[r, c]);
+                    Console.Write(board[r, c]); //' ' and not '\0'
                     Console.Write(" ");
                 }
                 Console.WriteLine("|"); // end of row

@@ -1,6 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
+
 using Connect4;
 
 class Program
@@ -29,7 +27,7 @@ class Program
             string? fname = Console.ReadLine();
             if (fname != null && File.Exists(fname))
                 gameAlgo = GameAlgo.Load(fname);
-            else
+            else 
             {
                 Console.WriteLine("File not found. Starting new game.");
                 gameAlgo = StartNew();
@@ -81,7 +79,7 @@ class Program
         {
             var player = gameAlgo.CurrentPlayer;
             Console.WriteLine();
-            RenderGrid.Display(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
+            RenderGrid.PrintBoard(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
             Player p1 = gameAlgo.CurrentPlayer.Id == _PlayerId.One ? gameAlgo.CurrentPlayer : gameAlgo.OtherPlayer;
             Player p2 = gameAlgo.CurrentPlayer.Id == _PlayerId.Two ? gameAlgo.CurrentPlayer : gameAlgo.OtherPlayer;
             Console.WriteLine($"Player 1 (@) — Ordinary: {p1.Ordinary}, Boring: {p1.Boring}, Magnetic: {p1.Magnetic}");
@@ -113,13 +111,13 @@ class Program
                 win = gameAlgo.DropDisc(player, t, chosen, true);
                 if (win)
                 {
-                    RenderGrid.Display(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
+                    RenderGrid.PrintBoard(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
                     Console.WriteLine($"Player {(int)player.Id + 1} wins!");
                     return;
                 }
                 if (gameAlgo.BoardFull())
                 {
-                    RenderGrid.Display(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
+                    RenderGrid.PrintBoard(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
                     Console.WriteLine("It's a draw.");
                     return;
                 }
@@ -198,13 +196,13 @@ class Program
             win = gameAlgo.DropDisc(player, type, column, true);
             if (!win && gameAlgo.BoardFull())
             {
-                RenderGrid.Display(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
+                RenderGrid.PrintBoard(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
                 Console.WriteLine("It's a draw.");
                 return;
             }
             if (win)
             {
-                RenderGrid.Display(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
+                RenderGrid.PrintBoard(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
                 Console.WriteLine($"Player {(int)player.Id + 1} wins!");
                 return;
             }
@@ -229,18 +227,18 @@ class Program
             bool win = game.DropDisc(player, type, col - 1, false);
             if (win)
             {
-                RenderGrid.Display(game.Board, game.Rows, game.Columns);
+                RenderGrid.PrintBoard(game.Board, game.Rows, game.Columns);
                 Console.WriteLine($"Player {(int)player.Id + 1} wins.");
                 return;
             }
             if (game.BoardFull())
             {
-                RenderGrid.Display(game.Board, game.Rows, game.Columns);
+                RenderGrid.PrintBoard(game.Board, game.Rows, game.Columns);
                 Console.WriteLine("Draw.");
                 return;
             }
             game.CurrentPlayerIndex = 1 - game.CurrentPlayerIndex;
         }
-        RenderGrid.Display(game.Board, game.Rows, game.Columns);
+        RenderGrid.PrintBoard(game.Board, game.Rows, game.Columns);
     }
 }
