@@ -1,6 +1,4 @@
-using System;
-using System.IO;
-using System.Text;
+
 using System.Text.Json;
 
 namespace Connect4
@@ -33,15 +31,29 @@ namespace Connect4
             players[1] = new Player(_PlayerId.Two, mode == _GameMode.HumanVsComputer, ordinary, 2, 2);
         }
 
-        public Player CurrentPlayer => players[CurrentPlayerIndex];
-        public Player OtherPlayer => players[1 - CurrentPlayerIndex];
+        public Player CurrentPlayer
+        {
+            get
+            {
+                return players[CurrentPlayerIndex];
+            }
+        }
+
+        public Player OtherPlayer
+        {
+            get
+            {
+                return players[1 - CurrentPlayerIndex];
+            }
+        }
+
         public char[,] Board => board;
 
         public bool DropDisc(Player player, _DiscType type, int column, bool showFrames)
         {
             if (column < 0 || column >= Columns) return false;
             if (column < 0 || column >= Columns) return false;
-            if (!player.HasDisc(type)) return false;
+            if (!player.RemDisc(type)) return false;
 
             int row = -1;
             for (int r = 0; r < Rows; r++)

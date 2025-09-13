@@ -17,7 +17,7 @@ namespace Connect4
             Magnetic = magnetic;
         }
 
-        public bool HasDisc(_DiscType type)
+        public bool RemDisc(_DiscType type)
         {
             bool result = false;
             if (type == _DiscType.Ordinary)
@@ -54,11 +54,11 @@ namespace Connect4
             {
                 Magnetic--;
             }
-            else
-            {
-                int ignore = 0;
-                ignore++;
-            }
+            // else
+            // {
+            //     int ignore = 0;
+            //     ignore++;
+            // }
         }
     }
 }

@@ -89,9 +89,9 @@ class Program
             {
                 Console.WriteLine("Computer thinking...");
                 var types = new List<_DiscType>();
-                if (player.HasDisc(_DiscType.Ordinary)) types.Add(_DiscType.Ordinary);
-                if (player.HasDisc(_DiscType.Boring)) types.Add(_DiscType.Boring);
-                if (player.HasDisc(_DiscType.Magnetic)) types.Add(_DiscType.Magnetic);
+                if (player.RemDisc(_DiscType.Ordinary)) types.Add(_DiscType.Ordinary);
+                if (player.RemDisc(_DiscType.Boring)) types.Add(_DiscType.Boring);
+                if (player.RemDisc(_DiscType.Magnetic)) types.Add(_DiscType.Magnetic);
                 _DiscType t = types[rng.Next(types.Count)];
                 int chosen;
                 if (t == _DiscType.Boring)
@@ -184,7 +184,7 @@ class Program
                     Console.WriteLine("⚠️ That column is full. Choose another column.");
                     continue;
                 }
-                if (!player.HasDisc(t))
+                if (!player.RemDisc(t))
                 {
                     Console.WriteLine($"⚠️ You have no {t.ToString().ToUpperInvariant()} discs left. Choose a disc type you still have.");
                     continue;
