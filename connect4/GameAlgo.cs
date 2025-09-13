@@ -23,7 +23,7 @@ namespace Connect4
             Columns = columns;
             Mode = mode;
             ConnectN = 4;
-            board = GridHelper.CreateBoard(Rows, Columns);
+            board = RenderGrid.GenBoard(Rows, Columns);
 
             int totalCells = rows * columns;
             int perPlayer = totalCells / 2;
@@ -74,7 +74,7 @@ namespace Connect4
 
             board[row, column] = discChar;
             player.UseDisc(type);
-            if (showFrames) GridHelper.Display(board, Rows, Columns);
+            if (showFrames) RenderGrid.Display(board, Rows, Columns);
 
             if (type == _DiscType.Boring)
             {
@@ -91,7 +91,7 @@ namespace Connect4
                 board[row, column] = ' ';
                 char boringChar = player.Id == _PlayerId.One ? 'B' : 'b';
                 board[0, column] = boringChar;
-                if (showFrames) GridHelper.Display(board, Rows, Columns);
+                if (showFrames) RenderGrid.Display(board, Rows, Columns);
                 board[0, column] = player.Id == _PlayerId.One ? '@' : '#';
                 row = 0;
             }
@@ -115,7 +115,7 @@ namespace Connect4
                     board[target, column] = above;
                     board[target + 1, column] = below;
                 }
-                if (showFrames) GridHelper.Display(board, Rows, Columns);
+                if (showFrames) RenderGrid.Display(board, Rows, Columns);
                 board[row, column] = player.Id == _PlayerId.One ? '@' : '#';
             }
 

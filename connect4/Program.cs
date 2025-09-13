@@ -9,16 +9,21 @@ class Program
     {
         if (args.Length > 0 && args[0] == "--test")
         {
-            string sequence = args.Length > 1 ? args[1] : Console.ReadLine() ?? string.Empty;
+            string sequence;
+            if (args.Length > 1)
+                sequence = args[1];
+            else
+                sequence = Console.ReadLine();
+            // passing the sequence of moves as a test suite in the program
             RunTest(sequence);
             return;
         }
 
-        Console.WriteLine("Welcome to Connect4!");
+        Console.WriteLine("____Welcome to Connect4!____");
         Console.WriteLine("Load game? (y/n)");
-        string? choice = Console.ReadLine();
+        string? choice = Console.ReadLine(); //variable might hold null and that's ok!
         GameAlgo gameAlgo;
-        if (choice != null && choice.Trim().ToLower() == "y")
+        if (choice != null && choice.Trim().ToLower() == "y") //strip whitespace and force it to lowercase
         {
             Console.WriteLine("Enter filename:");
             string? fname = Console.ReadLine();
@@ -76,7 +81,7 @@ class Program
         {
             var player = gameAlgo.CurrentPlayer;
             Console.WriteLine();
-            GridHelper.Display(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
+            RenderGrid.Display(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
             Player p1 = gameAlgo.CurrentPlayer.Id == _PlayerId.One ? gameAlgo.CurrentPlayer : gameAlgo.OtherPlayer;
             Player p2 = gameAlgo.CurrentPlayer.Id == _PlayerId.Two ? gameAlgo.CurrentPlayer : gameAlgo.OtherPlayer;
             Console.WriteLine($"Player 1 (@) — Ordinary: {p1.Ordinary}, Boring: {p1.Boring}, Magnetic: {p1.Magnetic}");
@@ -108,13 +113,13 @@ class Program
                 win = gameAlgo.DropDisc(player, t, chosen, true);
                 if (win)
                 {
-                    GridHelper.Display(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
+                    RenderGrid.Display(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
                     Console.WriteLine($"Player {(int)player.Id + 1} wins!");
                     return;
                 }
                 if (gameAlgo.BoardFull())
                 {
-                    GridHelper.Display(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
+                    RenderGrid.Display(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
                     Console.WriteLine("It's a draw.");
                     return;
                 }
@@ -193,13 +198,13 @@ class Program
             win = gameAlgo.DropDisc(player, type, column, true);
             if (!win && gameAlgo.BoardFull())
             {
-                GridHelper.Display(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
+                RenderGrid.Display(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
                 Console.WriteLine("It's a draw.");
                 return;
             }
             if (win)
             {
-                GridHelper.Display(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
+                RenderGrid.Display(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
                 Console.WriteLine($"Player {(int)player.Id + 1} wins!");
                 return;
             }
@@ -224,18 +229,18 @@ class Program
             bool win = game.DropDisc(player, type, col - 1, false);
             if (win)
             {
-                GridHelper.Display(game.Board, game.Rows, game.Columns);
+                RenderGrid.Display(game.Board, game.Rows, game.Columns);
                 Console.WriteLine($"Player {(int)player.Id + 1} wins.");
                 return;
             }
             if (game.BoardFull())
             {
-                GridHelper.Display(game.Board, game.Rows, game.Columns);
+                RenderGrid.Display(game.Board, game.Rows, game.Columns);
                 Console.WriteLine("Draw.");
                 return;
             }
             game.CurrentPlayerIndex = 1 - game.CurrentPlayerIndex;
         }
-        GridHelper.Display(game.Board, game.Rows, game.Columns);
+        RenderGrid.Display(game.Board, game.Rows, game.Columns);
     }
 }
