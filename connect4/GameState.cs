@@ -7,7 +7,7 @@ namespace Connect4
         public string[] Board { get; set; }
         public PlayerState[] Players { get; set; }
         public int CurrentPlayer { get; set; }
-        public GameMode Mode { get; set; }
+        public _GameMode Mode { get; set; }
     }
 }
 

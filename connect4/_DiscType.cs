@@ -1,6 +1,6 @@
 namespace Connect4
 {
-    public enum DiscType
+    public enum _DiscType
     {
         Ordinary,
         Boring,

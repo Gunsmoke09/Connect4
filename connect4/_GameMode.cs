@@ -1,6 +1,6 @@
 namespace Connect4
 {
-    public enum GameMode
+    public enum _GameMode
     {
         HumanVsHuman,
         HumanVsComputer

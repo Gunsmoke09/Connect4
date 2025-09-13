@@ -5,19 +5,19 @@ using System.Text.Json;
 
 namespace Connect4
 {
-    public class Game
+    public class GameAlgo
     {
         public int Rows { get; }
         public int Columns { get; }
         public int ConnectN { get; }
-        public GameMode Mode { get; }
+        public _GameMode Mode { get; }
 
         private readonly char[,] board;
         private readonly Player[] players = new Player[2];
         public int CurrentPlayerIndex = 0;
         private readonly Random rng = new Random();
 
-        public Game(int rows, int columns, GameMode mode)
+        public GameAlgo(int rows, int columns, _GameMode mode)
         {
             Rows = rows;
             Columns = columns;
@@ -29,15 +29,15 @@ namespace Connect4
             int perPlayer = totalCells / 2;
             int specials = 2; // Boring and Magnetic
             int ordinary = perPlayer - specials * 2; // two of each special
-            players[0] = new Player(PlayerId.One, false, ordinary, 2, 2);
-            players[1] = new Player(PlayerId.Two, mode == GameMode.HumanVsComputer, ordinary, 2, 2);
+            players[0] = new Player(_PlayerId.One, false, ordinary, 2, 2);
+            players[1] = new Player(_PlayerId.Two, mode == _GameMode.HumanVsComputer, ordinary, 2, 2);
         }
 
         public Player CurrentPlayer => players[CurrentPlayerIndex];
         public Player OtherPlayer => players[1 - CurrentPlayerIndex];
         public char[,] Board => board;
 
-        public bool DropDisc(Player player, DiscType type, int column, bool showFrames)
+        public bool DropDisc(Player player, _DiscType type, int column, bool showFrames)
         {
             if (column < 0 || column >= Columns) return false;
             if (column < 0 || column >= Columns) return false;
@@ -54,54 +54,54 @@ namespace Connect4
             }
             if (row == -1)
             {
-                if (type != DiscType.Boring) return false;
+                if (type != _DiscType.Boring) return false;
                 row = Rows - 1;
             }
 
             char discChar = ' ';
-            if (type == DiscType.Ordinary)
+            if (type == _DiscType.Ordinary)
             {
-                discChar = player.Id == PlayerId.One ? 'X' : 'O';
+                discChar = player.Id == _PlayerId.One ? '@' : '#';
             }
-            else if (type == DiscType.Boring)
+            else if (type == _DiscType.Boring)
             {
-                discChar = player.Id == PlayerId.One ? 'B' : 'b';
+                discChar = player.Id == _PlayerId.One ? 'B' : 'b';
             }
-            else if (type == DiscType.Magnetic)
+            else if (type == _DiscType.Magnetic)
             {
-                discChar = player.Id == PlayerId.One ? 'M' : 'm';
+                discChar = player.Id == _PlayerId.One ? 'M' : 'm';
             }
 
             board[row, column] = discChar;
             player.UseDisc(type);
             if (showFrames) GridHelper.Display(board, Rows, Columns);
 
-            if (type == DiscType.Boring)
+            if (type == _DiscType.Boring)
             {
                 for (int r = 0; r < row; r++)
                 {
                     char existing = board[r, column];
-                    if (existing == 'X' || existing == 'O' || existing == 'B' || existing == 'b' || existing == 'M' || existing == 'm')
+                    if (existing == '@' || existing == '#' || existing == 'B' || existing == 'b' || existing == 'M' || existing == 'm')
                     {
-                        PlayerId owner = existing == 'X' || existing == 'B' || existing == 'M' ? PlayerId.One : PlayerId.Two;
+                        _PlayerId owner = existing == '@' || existing == 'B' || existing == 'M' ? _PlayerId.One : _PlayerId.Two;
                         players[(int)owner].Ordinary++;
                     }
                     board[r, column] = ' ';
                 }
                 board[row, column] = ' ';
-                char boringChar = player.Id == PlayerId.One ? 'B' : 'b';
+                char boringChar = player.Id == _PlayerId.One ? 'B' : 'b';
                 board[0, column] = boringChar;
                 if (showFrames) GridHelper.Display(board, Rows, Columns);
-                board[0, column] = player.Id == PlayerId.One ? 'X' : 'O';
+                board[0, column] = player.Id == _PlayerId.One ? '@' : '#';
                 row = 0;
             }
-            else if (type == DiscType.Magnetic)
+            else if (type == _DiscType.Magnetic)
             {
                 int target = -1;
                 for (int r = row - 1; r >= 0; r--)
                 {
                     char ch = board[r, column];
-                    bool mine = player.Id == PlayerId.One ? (ch == 'X' || ch == 'B' || ch == 'M') : (ch == 'O' || ch == 'b' || ch == 'm');
+                    bool mine = player.Id == _PlayerId.One ? (ch == '@' || ch == 'B' || ch == 'M') : (ch == '#' || ch == 'b' || ch == 'm');
                     if (mine)
                     {
                         target = r;
@@ -116,21 +116,21 @@ namespace Connect4
                     board[target + 1, column] = below;
                 }
                 if (showFrames) GridHelper.Display(board, Rows, Columns);
-                board[row, column] = player.Id == PlayerId.One ? 'X' : 'O';
+                board[row, column] = player.Id == _PlayerId.One ? '@' : '#';
             }
 
             bool win = CheckWin(row, column, player.Id);
             return win;
         }
 
-        public bool CheckWin(int row, int column, PlayerId player)
+        public bool CheckWin(int row, int column, _PlayerId player)
         {
             int count = 1;
             int r = row + 1;
             while (r < Rows)
             {
                 char ch = board[r, column];
-                bool match = player == PlayerId.One ? ch == 'X' || ch == 'B' || ch == 'M' : ch == 'O' || ch == 'b' || ch == 'm';
+                bool match = player == _PlayerId.One ? ch == '@' || ch == 'B' || ch == 'M' : ch == '#' || ch == 'b' || ch == 'm';
                 if (match) count++; else break;
                 r++;
             }
@@ -138,7 +138,7 @@ namespace Connect4
             while (r >= 0)
             {
                 char ch = board[r, column];
-                bool match = player == PlayerId.One ? ch == 'X' || ch == 'B' || ch == 'M' : ch == 'O' || ch == 'b' || ch == 'm';
+                bool match = player == _PlayerId.One ? ch == '@' || ch == 'B' || ch == 'M' : ch == '#' || ch == 'b' || ch == 'm';
                 if (match) count++; else break;
                 r--;
             }
@@ -149,7 +149,7 @@ namespace Connect4
             while (c < Columns)
             {
                 char ch = board[row, c];
-                bool match = player == PlayerId.One ? ch == 'X' || ch == 'B' || ch == 'M' : ch == 'O' || ch == 'b' || ch == 'm';
+                bool match = player == _PlayerId.One ? ch == '@' || ch == 'B' || ch == 'M' : ch == '#' || ch == 'b' || ch == 'm';
                 if (match) count++; else break;
                 c++;
             }
@@ -157,7 +157,7 @@ namespace Connect4
             while (c >= 0)
             {
                 char ch = board[row, c];
-                bool match = player == PlayerId.One ? ch == 'X' || ch == 'B' || ch == 'M' : ch == 'O' || ch == 'b' || ch == 'm';
+                bool match = player == _PlayerId.One ? ch == '@' || ch == 'B' || ch == 'M' : ch == '#' || ch == 'b' || ch == 'm';
                 if (match) count++; else break;
                 c--;
             }
@@ -169,7 +169,7 @@ namespace Connect4
             while (r < Rows && c < Columns)
             {
                 char ch = board[r, c];
-                bool match = player == PlayerId.One ? ch == 'X' || ch == 'B' || ch == 'M' : ch == 'O' || ch == 'b' || ch == 'm';
+                bool match = player == _PlayerId.One ? ch == '@' || ch == 'B' || ch == 'M' : ch == '#' || ch == 'b' || ch == 'm';
                 if (match) count++; else break;
                 r++;
                 c++;
@@ -179,7 +179,7 @@ namespace Connect4
             while (r >= 0 && c >= 0)
             {
                 char ch = board[r, c];
-                bool match = player == PlayerId.One ? ch == 'X' || ch == 'B' || ch == 'M' : ch == 'O' || ch == 'b' || ch == 'm';
+                bool match = player == _PlayerId.One ? ch == '@' || ch == 'B' || ch == 'M' : ch == '#' || ch == 'b' || ch == 'm';
                 if (match) count++; else break;
                 r--;
                 c--;
@@ -192,7 +192,7 @@ namespace Connect4
             while (r < Rows && c >= 0)
             {
                 char ch = board[r, c];
-                bool match = player == PlayerId.One ? ch == 'X' || ch == 'B' || ch == 'M' : ch == 'O' || ch == 'b' || ch == 'm';
+                bool match = player == _PlayerId.One ? ch == '@' || ch == 'B' || ch == 'M' : ch == '#' || ch == 'b' || ch == 'm';
                 if (match) count++; else break;
                 r++;
                 c--;
@@ -202,7 +202,7 @@ namespace Connect4
             while (r >= 0 && c < Columns)
             {
                 char ch = board[r, c];
-                bool match = player == PlayerId.One ? ch == 'X' || ch == 'B' || ch == 'M' : ch == 'O' || ch == 'b' || ch == 'm';
+                bool match = player == _PlayerId.One ? ch == '@' || ch == 'B' || ch == 'M' : ch == '#' || ch == 'b' || ch == 'm';
                 if (match) count++; else break;
                 r--;
                 c++;
@@ -256,12 +256,12 @@ namespace Connect4
             File.WriteAllText(filename, json);
         }
 
-        public static Game Load(string filename)
+        public static GameAlgo Load(string filename)
         {
             var json = File.ReadAllText(filename);
             var state = JsonSerializer.Deserialize<GameState>(json);
             if (state == null) throw new Exception("Invalid save file");
-            var game = new Game(state.Rows, state.Columns, state.Mode);
+            var game = new GameAlgo(state.Rows, state.Columns, state.Mode);
             for (int r = 0; r < state.Rows; r++)
             {
                 for (int c = 0; c < state.Columns; c++)
