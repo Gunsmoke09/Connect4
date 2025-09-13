@@ -3,6 +3,8 @@ using Connect4;
 
 class Program
 {
+    const string SaveFile = "savedgame";
+
     static void Main(string[] args)
     {
         if (args.Length > 0 && args[0] == "--test")
@@ -12,24 +14,23 @@ class Program
                 sequence = args[1];
             else
                 sequence = Console.ReadLine();
-            // passing the sequence of moves as a test suite in the program
-            RunTest(sequence);
+            Testing.Run(sequence);
             return;
         }
 
         Console.WriteLine("____Welcome to Connect4!____");
-        Console.WriteLine("Load game? (y/n)");
-        string? choice = Console.ReadLine(); //variable might hold null and that's ok!
+        Console.WriteLine("Load saved game? (y/n)");
+        string? choice = Console.ReadLine();
         GameAlgo gameAlgo;
-        if (choice != null && choice.Trim().ToLower() == "y") //strip whitespace and force it to lowercase
+        if (choice != null && choice.Trim().ToLower() == "y")
         {
-            Console.WriteLine("Enter filename:");
-            string? fname = Console.ReadLine();
-            if (fname != null && File.Exists(fname))
-                gameAlgo = GameAlgo.Load(fname);
-            else 
+            if (File.Exists(SaveFile))
             {
-                Console.WriteLine("File not found. Starting new game.");
+                gameAlgo = GameAlgo.Load(SaveFile);
+            }
+            else
+            {
+                Console.WriteLine("No saved game found. Starting new game.");
                 gameAlgo = StartNew();
             }
         }
@@ -88,26 +89,52 @@ class Program
             if (player.IsComputer)
             {
                 Console.WriteLine("Computer thinking...");
-                var types = new List<_DiscType>();
-                if (player.RemDisc(_DiscType.Ordinary)) types.Add(_DiscType.Ordinary);
-                if (player.RemDisc(_DiscType.Boring)) types.Add(_DiscType.Boring);
-                if (player.RemDisc(_DiscType.Magnetic)) types.Add(_DiscType.Magnetic);
-                _DiscType t = types[rng.Next(types.Count)];
-                int chosen;
-                if (t == _DiscType.Boring)
+                int chosen = -1;
+                _DiscType t = _DiscType.Ordinary;
+
+                if (player.RemDisc(_DiscType.Ordinary))
                 {
-                    chosen = rng.Next(gameAlgo.Columns);
-                }
-                else
-                {
-                    var cols = new List<int>();
                     for (int c = 0; c < gameAlgo.Columns; c++)
                     {
-                        if (gameAlgo.Board[gameAlgo.Rows - 1, c] == ' ') cols.Add(c);
+                        if (gameAlgo.Board[gameAlgo.Rows - 1, c] != ' ') continue;
+                        int r = 0;
+                        while (r < gameAlgo.Rows && gameAlgo.Board[r, c] != ' ') r++;
+                        char disc = player.Id == _PlayerId.One ? '@' : '#';
+                        gameAlgo.Board[r, c] = disc;
+                        bool wouldWin = gameAlgo.CheckWin(r, c, player.Id);
+                        gameAlgo.Board[r, c] = ' ';
+                        if (wouldWin)
+                        {
+                            chosen = c;
+                            t = _DiscType.Ordinary;
+                            break;
+                        }
                     }
-                    if (cols.Count == 0) return;
-                    chosen = cols[rng.Next(cols.Count)];
                 }
+
+                if (chosen == -1)
+                {
+                    var types = new List<_DiscType>();
+                    if (player.RemDisc(_DiscType.Ordinary)) types.Add(_DiscType.Ordinary);
+                    if (player.RemDisc(_DiscType.Boring)) types.Add(_DiscType.Boring);
+                    if (player.RemDisc(_DiscType.Magnetic)) types.Add(_DiscType.Magnetic);
+                    t = types[rng.Next(types.Count)];
+                    if (t == _DiscType.Boring)
+                    {
+                        chosen = rng.Next(gameAlgo.Columns);
+                    }
+                    else
+                    {
+                        var cols = new List<int>();
+                        for (int c = 0; c < gameAlgo.Columns; c++)
+                        {
+                            if (gameAlgo.Board[gameAlgo.Rows - 1, c] == ' ') cols.Add(c);
+                        }
+                        if (cols.Count == 0) return;
+                        chosen = cols[rng.Next(cols.Count)];
+                    }
+                }
+
                 win = gameAlgo.DropDisc(player, t, chosen, true);
                 if (win)
                 {
@@ -129,31 +156,23 @@ class Program
             int column;
             while (true)
             {
-                Console.WriteLine($"Player {(int)player.Id + 1} turn. Enter move (e.g., O4, B3, M5) or 'save <file>' or 'help':");
+                Console.WriteLine($"Player {(int)player.Id + 1} turn. Enter move (e.g., O4, B3, M5) or 'save' or 'help':");
                 string? input = Console.ReadLine();
                 if (input == null) continue;
                 input = input.Trim();
-                if (input.StartsWith("save"))
+                if (input == "save")
                 {
-                    var parts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length == 2)
-                    {
-                        gameAlgo.Save(parts[1]);
-                        Console.WriteLine("Game saved.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Usage: save filename");
-                    }
+                    gameAlgo.Save(SaveFile);
+                    Console.WriteLine("Game saved.");
                     continue;
                 }
                 if (input == "help")
                 {
                     Console.WriteLine("Commands:");
-                    Console.WriteLine("O# - ordinary disc in column #");
+                    Console.WriteLine("O# or 0# - ordinary disc in column #");
                     Console.WriteLine("B# - boring disc in column # (removes column)");
                     Console.WriteLine("M# - magnetic disc in column # (lifts own disc)");
-                    Console.WriteLine("save <file> - save game");
+                    Console.WriteLine("save - save game");
                     Console.WriteLine("help - show this help");
                     Console.WriteLine("exit - quit");
                     continue;
@@ -171,8 +190,15 @@ class Program
                     continue;
                 }
                 char up = char.ToUpperInvariant(typeChar);
-                _DiscType t = _DiscType.Ordinary;
-                if (up == 'B') t = _DiscType.Boring; else if (up == 'M') t = _DiscType.Magnetic;
+                _DiscType t;
+                if (up == 'O' || typeChar == '0') t = _DiscType.Ordinary;
+                else if (up == 'B') t = _DiscType.Boring;
+                else if (up == 'M') t = _DiscType.Magnetic;
+                else
+                {
+                    Console.WriteLine("Invalid disc type. Use O, B, or M.");
+                    continue;
+                }
                 int col = colInput - 1;
                 if (col < 0 || col >= gameAlgo.Columns)
                 {
@@ -210,35 +236,4 @@ class Program
         }
     }
 
-    static void RunTest(string sequence)
-    {
-        var game = new GameAlgo(6, 7, _GameMode.HumanVsHuman);
-        var moves = sequence.Split(',', StringSplitOptions.RemoveEmptyEntries);
-        foreach (var mv in moves)
-        {
-            var trimmed = mv.Trim();
-            if (trimmed.Length < 2) continue;
-            char typeChar = trimmed[0];
-            if (!int.TryParse(trimmed.Substring(1), out int col)) continue;
-            var player = game.CurrentPlayer;
-            char up = char.ToUpperInvariant(typeChar);
-            _DiscType type = _DiscType.Ordinary;
-            if (up == 'B') type = _DiscType.Boring; else if (up == 'M') type = _DiscType.Magnetic;
-            bool win = game.DropDisc(player, type, col - 1, false);
-            if (win)
-            {
-                RenderGrid.PrintBoard(game.Board, game.Rows, game.Columns);
-                Console.WriteLine($"Player {(int)player.Id + 1} wins.");
-                return;
-            }
-            if (game.BoardFull())
-            {
-                RenderGrid.PrintBoard(game.Board, game.Rows, game.Columns);
-                Console.WriteLine("Draw.");
-                return;
-            }
-            game.CurrentPlayerIndex = 1 - game.CurrentPlayerIndex;
-        }
-        RenderGrid.PrintBoard(game.Board, game.Rows, game.Columns);
-    }
 }
