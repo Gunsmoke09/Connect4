@@ -1,7 +1,7 @@
 //using _ underscore for enum files
 namespace Connect4
 {
-    public enum _DiscType
+    public enum DiscType
     {
         Ordinary,
         Boring,

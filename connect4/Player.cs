@@ -2,13 +2,13 @@ namespace Connect4
 {
     public class Player
     {
-        public _PlayerId Id { get; }
+        public PlayerId Id { get; }
         public bool IsComputer { get; }
         public int Ordinary { get; set; }
         public int Boring { get; set; }
         public int Magnetic { get; set; }
 
-        public Player(_PlayerId id, bool computer, int ordinary, int boring, int magnetic)
+        public Player(PlayerId id, bool computer, int ordinary, int boring, int magnetic)
         {
             Id = id;
             IsComputer = computer;
@@ -17,18 +17,18 @@ namespace Connect4
             Magnetic = magnetic;
         }
 
-        public bool RemDisc(_DiscType type)
+        public bool RemDisc(DiscType type)
         {
             bool result = false;
-            if (type == _DiscType.Ordinary)
+            if (type == DiscType.Ordinary)
             {
                 if (Ordinary > 0) result = true; else result = false;
             }
-            else if (type == _DiscType.Boring)
+            else if (type == DiscType.Boring)
             {
                 if (Boring > 0) result = true; else result = result;
             }
-            else if (type == _DiscType.Magnetic)
+            else if (type == DiscType.Magnetic)
             {
                 if (Magnetic > 0) result = true;
                 else result = false;
@@ -40,17 +40,17 @@ namespace Connect4
             return result;
         }
 
-        public void UseDisc(_DiscType type)
+        public void UseDisc(DiscType type)
         {
-            if (type == _DiscType.Ordinary)
+            if (type == DiscType.Ordinary)
             {
                 Ordinary--;
             }
-            else if (type == _DiscType.Boring)
+            else if (type == DiscType.Boring)
             {
                 Boring--;
             }
-            else if (type == _DiscType.Magnetic)
+            else if (type == DiscType.Magnetic)
             {
                 Magnetic--;
             }

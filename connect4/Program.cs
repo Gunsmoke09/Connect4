@@ -52,7 +52,7 @@ class Program
             if (int.TryParse(s, out modeSel) && modeSel >= 1 && modeSel <= 2) break;
             Console.WriteLine("Enter number between 1 and 2");
         }
-        _GameMode mode = modeSel == 1 ? _GameMode.HumanVsHuman : _GameMode.HumanVsComputer;
+        GameMode mode = modeSel == 1 ? GameMode.HumanVsHuman : GameMode.HumanVsComputer;
 
         Console.WriteLine("Enter rows (>=6):");
         int rows;
@@ -81,8 +81,8 @@ class Program
             var player = gameAlgo.CurrentPlayer;
             Console.WriteLine();
             RenderGrid.PrintBoard(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
-            Player p1 = gameAlgo.CurrentPlayer.Id == _PlayerId.One ? gameAlgo.CurrentPlayer : gameAlgo.OtherPlayer;
-            Player p2 = gameAlgo.CurrentPlayer.Id == _PlayerId.Two ? gameAlgo.CurrentPlayer : gameAlgo.OtherPlayer;
+            Player p1 = gameAlgo.CurrentPlayer.Id == PlayerId.One ? gameAlgo.CurrentPlayer : gameAlgo.OtherPlayer;
+            Player p2 = gameAlgo.CurrentPlayer.Id == PlayerId.Two ? gameAlgo.CurrentPlayer : gameAlgo.OtherPlayer;
             Console.WriteLine($"Player 1 (@) — Ordinary: {p1.Ordinary}, Boring: {p1.Boring}, Magnetic: {p1.Magnetic}");
             Console.WriteLine($"Player 2 (#) — Ordinary: {p2.Ordinary}, Boring: {p2.Boring}, Magnetic: {p2.Magnetic}");
             bool win;
@@ -90,23 +90,23 @@ class Program
             {
                 Console.WriteLine("Computer thinking...");
                 int chosen = -1;
-                _DiscType t = _DiscType.Ordinary;
+                DiscType t = DiscType.Ordinary;
 
-                if (player.RemDisc(_DiscType.Ordinary))
+                if (player.RemDisc(DiscType.Ordinary))
                 {
                     for (int c = 0; c < gameAlgo.Columns; c++)
                     {
                         if (gameAlgo.Board[gameAlgo.Rows - 1, c] != ' ') continue;
                         int r = 0;
                         while (r < gameAlgo.Rows && gameAlgo.Board[r, c] != ' ') r++;
-                        char disc = player.Id == _PlayerId.One ? '@' : '#';
+                        char disc = player.Id == PlayerId.One ? '@' : '#';
                         gameAlgo.Board[r, c] = disc;
                         bool wouldWin = gameAlgo.CheckWin(r, c, player.Id);
                         gameAlgo.Board[r, c] = ' ';
                         if (wouldWin)
                         {
                             chosen = c;
-                            t = _DiscType.Ordinary;
+                            t = DiscType.Ordinary;
                             break;
                         }
                     }
@@ -114,12 +114,12 @@ class Program
 
                 if (chosen == -1)
                 {
-                    var types = new List<_DiscType>();
-                    if (player.RemDisc(_DiscType.Ordinary)) types.Add(_DiscType.Ordinary);
-                    if (player.RemDisc(_DiscType.Boring)) types.Add(_DiscType.Boring);
-                    if (player.RemDisc(_DiscType.Magnetic)) types.Add(_DiscType.Magnetic);
+                    var types = new List<DiscType>();
+                    if (player.RemDisc(DiscType.Ordinary)) types.Add(DiscType.Ordinary);
+                    if (player.RemDisc(DiscType.Boring)) types.Add(DiscType.Boring);
+                    if (player.RemDisc(DiscType.Magnetic)) types.Add(DiscType.Magnetic);
                     t = types[rng.Next(types.Count)];
-                    if (t == _DiscType.Boring)
+                    if (t == DiscType.Boring)
                     {
                         chosen = rng.Next(gameAlgo.Columns);
                     }
@@ -135,7 +135,7 @@ class Program
                     }
                 }
 
-                win = gameAlgo.DropDisc(player, t, chosen, true);
+                win = gameAlgo.DiscFalls(player, t, chosen, true);
                 if (win)
                 {
                     RenderGrid.PrintBoard(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
@@ -152,7 +152,7 @@ class Program
                 continue;
             }
 
-            _DiscType type;
+            DiscType type;
             int column;
             while (true)
             {
@@ -190,10 +190,10 @@ class Program
                     continue;
                 }
                 char up = char.ToUpperInvariant(typeChar);
-                _DiscType t;
-                if (up == 'O' || typeChar == '0') t = _DiscType.Ordinary;
-                else if (up == 'B') t = _DiscType.Boring;
-                else if (up == 'M') t = _DiscType.Magnetic;
+                DiscType t;
+                if (up == 'O' || typeChar == '0') t = DiscType.Ordinary;
+                else if (up == 'B') t = DiscType.Boring;
+                else if (up == 'M') t = DiscType.Magnetic;
                 else
                 {
                     Console.WriteLine("Invalid disc type. Use O, B, or M.");
@@ -205,7 +205,7 @@ class Program
                     Console.WriteLine($"⚠️ Invalid column. Please enter a number between 1 and {gameAlgo.Columns}.");
                     continue;
                 }
-                if (gameAlgo.Board[gameAlgo.Rows - 1, col] != ' ' && t != _DiscType.Boring)
+                if (gameAlgo.Board[gameAlgo.Rows - 1, col] != ' ' && t != DiscType.Boring)
                 {
                     Console.WriteLine("⚠️ That column is full. Choose another column.");
                     continue;
@@ -219,7 +219,7 @@ class Program
                 column = col;
                 break;
             }
-            win = gameAlgo.DropDisc(player, type, column, true);
+            win = gameAlgo.DiscFalls(player, type, column, true);
             if (!win && gameAlgo.BoardFull())
             {
                 RenderGrid.PrintBoard(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);

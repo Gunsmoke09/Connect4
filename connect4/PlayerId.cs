@@ -1,10 +1,10 @@
 //using _ underscore for enum files
 namespace Connect4
 {
-    public enum _GameMode
+    public enum PlayerId
     {
-        HumanVsHuman,
-        HumanVsComputer
+        One = 0,
+        Two = 1
     }
 }
 

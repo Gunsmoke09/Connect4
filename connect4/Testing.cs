@@ -6,7 +6,7 @@ namespace Connect4
     {
         public static void Run(string sequence)
         {
-            var game = new GameAlgo(6, 7, _GameMode.HumanVsHuman);
+            var game = new GameAlgo(6, 7, GameMode.HumanVsHuman);
             var moves = sequence.Split(',', StringSplitOptions.RemoveEmptyEntries);
             foreach (var mv in moves)
             {
@@ -16,12 +16,12 @@ namespace Connect4
                 if (!int.TryParse(trimmed.Substring(1), out int col)) continue;
                 var player = game.CurrentPlayer;
                 char up = char.ToUpperInvariant(typeChar);
-                _DiscType type;
-                if (up == 'O' || typeChar == '0') type = _DiscType.Ordinary;
-                else if (up == 'B') type = _DiscType.Boring;
-                else if (up == 'M') type = _DiscType.Magnetic;
+                DiscType type;
+                if (up == 'O' || typeChar == '0') type = DiscType.Ordinary;
+                else if (up == 'B') type = DiscType.Boring;
+                else if (up == 'M') type = DiscType.Magnetic;
                 else continue;
-                bool win = game.DropDisc(player, type, col - 1, false);
+                bool win = game.DiscFalls(player, type, col - 1, false);
                 if (win)
                 {
                     RenderGrid.PrintBoard(game.Board, game.Rows, game.Columns);
