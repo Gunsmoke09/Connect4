@@ -13,13 +13,17 @@ namespace Connect4
                 var trimmed = mv.Trim();
                 if (trimmed.Length < 2) continue;
                 char typeChar = trimmed[0];
-                if (!int.TryParse(trimmed.Substring(1), out int col)) continue;
+                if (!int.TryParse(trimmed.Substring(1), out int col))
+                    continue;
                 var player = game.CurrentPlayer;
                 char up = char.ToUpperInvariant(typeChar);
                 DiscType type;
+                
                 if (up == 'O' || typeChar == '0') type = DiscType.Ordinary;
-                else if (up == 'B') type = DiscType.Boring;
-                else if (up == 'M') type = DiscType.Magnetic;
+                else if (up == 'B') 
+                    type = DiscType.Boring;
+                else if (up == 'M') 
+                    type = DiscType.Magnetic;
                 else continue;
                 var winner = game.DiscFalls(player, type, col - 1);
                 if (winner.HasValue)
