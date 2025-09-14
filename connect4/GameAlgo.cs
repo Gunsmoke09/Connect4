@@ -46,12 +46,12 @@ namespace Connect4
 
         public char[,] Board => board;
 
-        public bool DiscFalls(Player player, DiscType type, int column, bool wantsPrint)
+        public PlayerId? DiscFalls(Player player, DiscType type, int column)
         {
             if (column < 0 || column >= Columns) //boundary check on columns
-                return false;
-            
-            if (!player.RemDisc(type)) return false; // checking if the player has remaining dics or not
+                return null;
+
+            if (!player.RemDisc(type)) return null; // checking if the player has remaining discs or not
 
             int row = -1; //assuming the column is already full by default
             
@@ -66,8 +66,8 @@ namespace Connect4
             if (row == -1)
             {
                 //disc won;t fall unless it is a boring disc
-                if (type != DiscType.Boring) 
-                    return false;
+                if (type != DiscType.Boring)
+                    return null;
                 row = Rows - 1; //if it is boring then we just remove the top disc and insert it there
             }
 
@@ -87,8 +87,6 @@ namespace Connect4
 
             board[row, column] = discChar; //placing that disc in the respective cell
             player.UseDisc(type); //subtracting the inventory of discs from the player
-            if (wantsPrint) //if we want to print the grid or not
-                RenderGrid.PrintBoard(board, Rows, Columns); 
 
             if (type == DiscType.Boring)
             {
@@ -110,8 +108,6 @@ namespace Connect4
                 board[row, column] = ' '; // it was where B landed now it is cleared for B to go down
 
                 board[0, column] = 'B';
-                if (wantsPrint) RenderGrid.PrintBoard(board, Rows, Columns); //prints with the 'B' disc at the bottom
-                
                 board[0, column] = player.Id == PlayerId.One ? '@' : '#'; //now the 'B' disc is converted to ordinary disc
                 row = 0;
             }
@@ -141,13 +137,29 @@ namespace Connect4
                     board[target, column] = above;
                     board[target + 1, column] = below;
                 }
-                if (wantsPrint) RenderGrid.PrintBoard(board, Rows, Columns);
                 board[row, column] = player.Id == PlayerId.One ? '@' : '#';
                 //printing the grid then changing the special disc back to the ordinary
             }
 
+            if (CheckAnyWin(player.Id)) return player.Id;
+            if (CheckAnyWin(OtherPlayer.Id)) return OtherPlayer.Id;
+            return null;
+        }
 
-            return (CheckWin(row, column, player.Id));
+        private bool CheckAnyWin(PlayerId player)
+        {
+            for (int r = 0; r < Rows; r++)
+            {
+                for (int c = 0; c < Columns; c++)
+                {
+                    char ch = board[r, c];
+                    bool owned = player == PlayerId.One
+                        ? ch == '@' || ch == 'B' || ch == 'M'
+                        : ch == '#' || ch == 'b' || ch == 'm';
+                    if (owned && CheckWin(r, c, player)) return true;
+                }
+            }
+            return false;
         }
 
         public bool CheckWin(int row, int column, PlayerId player)

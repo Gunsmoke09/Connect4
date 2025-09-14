@@ -21,11 +21,11 @@ namespace Connect4
                 else if (up == 'B') type = DiscType.Boring;
                 else if (up == 'M') type = DiscType.Magnetic;
                 else continue;
-                bool win = game.DiscFalls(player, type, col - 1, false);
-                if (win)
+                var winner = game.DiscFalls(player, type, col - 1);
+                if (winner.HasValue)
                 {
                     RenderGrid.PrintBoard(game.Board, game.Rows, game.Columns);
-                    Console.WriteLine($"Player {(int)player.Id + 1} wins.");
+                    Console.WriteLine($"Player {(int)winner.Value + 1} wins.");
                     return;
                 }
                 if (game.BoardFull())
