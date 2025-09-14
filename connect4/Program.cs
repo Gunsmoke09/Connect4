@@ -88,6 +88,7 @@ class Program
         var rng = new Random();
         RenderGrid.PrintBoard(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
         PrintStatus(gameAlgo);
+        Console.WriteLine($"Connect {gameAlgo.ConnectN} to win!");
         Console.WriteLine("-------------");
 
         while (true)
