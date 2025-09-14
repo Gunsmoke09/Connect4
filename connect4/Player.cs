@@ -26,9 +26,9 @@ namespace Connect4
             }
             else if (type == DiscType.Boring)
             {
-                if (Boring > 0) result = true; 
-                else 
-                    result = result;
+                if (Boring > 0) result = true;
+                else
+                    result = false;
             }
             else if (type == DiscType.Magnetic)
             {

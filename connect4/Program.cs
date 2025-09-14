@@ -10,18 +10,14 @@ class Program
         // to enter test mode from the terminal
         if (args.Length > 0 && args[0] == "--test")
         {
-            string sequence;
-            if (args.Length > 1)
-                sequence = args[1];
-            else
-                sequence = Console.ReadLine();
+            string sequence = args.Length > 1 ? args[1] : Console.ReadLine() ?? string.Empty;
             Testing.Run(sequence);
             return; //ends after the test run
         }
 // main menu (starting of the game)
         Console.WriteLine("_____Welcome to Connect4!_____");
         Console.WriteLine("Load saved game? (y/n)");
-        string choice = Console.ReadLine();
+        string? choice = Console.ReadLine();
         GameAlgo gameAlgo;
         
         
@@ -51,10 +47,10 @@ class Program
     {
         Console.WriteLine("Select mode: 1) Human vs Human 2) Human vs Computer");
         int selectMode;
-        
+
         while (true)
         {
-            string s = Console.ReadLine();
+            string? s = Console.ReadLine();
             if (int.TryParse(s, out selectMode) && selectMode >= 1 && selectMode <= 2) // only accept valid input
                 break;
             Console.WriteLine("Enter number between 1 and 2");
@@ -66,7 +62,7 @@ class Program
         int rows;
         while (true)
         {
-            string s = Console.ReadLine();
+            string? s = Console.ReadLine();
             if (int.TryParse(s, out rows) && rows >= 6 && rows <= 100) //only accepting valid inputs
                 break;
             Console.WriteLine("Enter number between 6 and 100");
@@ -75,7 +71,7 @@ class Program
         int cols;
         while (true)
         {
-            string s = Console.ReadLine();
+            string? s = Console.ReadLine();
             if (int.TryParse(s, out cols) && cols >= 7 && cols <= 100 && cols >= rows) //only accepting valid inputs
                 break;
             Console.WriteLine("Columns must be >= rows and between 7 and 100");
@@ -177,7 +173,7 @@ class Program
                     );
                     try
                     {
-                        string input = Console.ReadLine();
+                        string? input = Console.ReadLine();
                         if (input == null) continue;
                         input = input.Trim().ToLower();
                         if (input == "save")
