@@ -1,11 +1,9 @@
 
-using System;
-using System.Collections.Generic;
 using Connect4;
 
 class Program
 {
-    const string SaveFile = "savedgame.json";
+    const string SaveFile = "savedgame.json"; //savefile name
 
     static void Main(string[] args)
     {
@@ -18,24 +16,26 @@ class Program
             else
                 sequence = Console.ReadLine();
             Testing.Run(sequence);
-            return;
+            return; //ends after the test run
         }
-
+// main menu (starting of the game)
         Console.WriteLine("_____Welcome to Connect4!_____");
         Console.WriteLine("Load saved game? (y/n)");
         string choice = Console.ReadLine();
         GameAlgo gameAlgo;
-
+        
+        
         if (choice != null && choice.Trim().ToLower() == "y")
         {
             try
             {
-                gameAlgo = GameAlgo.Load(SaveFile);
+                gameAlgo = GameAlgo.Load(SaveFile); 
                 Console.WriteLine($"Game loaded. Player {(int)gameAlgo.CurrentPlayer.Id + 1}'s turn.");
             }
             catch (Exception)
             {
-                Console.WriteLine("⚠ Error: Could not load save file. Please try again.");
+                //if loading fails (file missing)
+                Console.WriteLine("!!!  Error: Could not load save file. Please try again.");
                 gameAlgo = StartNew();
             }
         }
@@ -46,6 +46,7 @@ class Program
         PlayGame(gameAlgo);
     }
 
+    //building a new game
     static GameAlgo StartNew()
     {
         Console.WriteLine("Select mode: 1) Human vs Human 2) Human vs Computer");
@@ -94,100 +95,127 @@ class Program
         while (true)
         {
             var player = gameAlgo.CurrentPlayer;
-            PlayerId? winner;
-
+            PlayerId? winner; 
+            
+            //computer turn
             if (player.IsComputer)
             {
-                int chosen = -1;
-                DiscType t = DiscType.Ordinary;
+                int AI_choice = -1; //initialising with out of bound value
+                DiscType t = DiscType.Ordinary; //AI plays only the ordinary for now
 
+                // code to check if the next drop can win the game for computer (all possibilitie)
                 if (player.RemDisc(DiscType.Ordinary))
                 {
                     for (int c = 0; c < gameAlgo.Columns; c++)
                     {
+                        // if columns are full then ignore
                         if (gameAlgo.Board[gameAlgo.Rows - 1, c] != ' ') continue;
+                        
+                        // find the empty row
                         int r = 0;
-                        while (r < gameAlgo.Rows && gameAlgo.Board[r, c] != ' ') r++;
-                        char disc = player.Id == PlayerId.One ? '@' : '#';
-                        gameAlgo.Board[r, c] = disc;
+                        while (r < gameAlgo.Rows && gameAlgo.Board[r, c] != ' ') 
+                            r++;
+                        
+                        char disc = player.Id == PlayerId.One ? '@' : '#'; 
+                        gameAlgo.Board[r, c] = disc; //temp drop ordinary there to check for win
                         bool wouldWin = gameAlgo.CheckWin(r, c, player.Id);
-                        gameAlgo.Board[r, c] = ' ';
+                        gameAlgo.Board[r, c] = ' '; // remove the temp drop
+                        
                         if (wouldWin)
                         {
-                            chosen = c;
+                            AI_choice = c;
                             t = DiscType.Ordinary;
                             break;
                         }
                     }
                 }
 
-                if (chosen == -1)
+                if (AI_choice == -1)
                 {
                     var types = new List<DiscType>();
+                    //list of discs AI has
                     if (player.RemDisc(DiscType.Ordinary)) types.Add(DiscType.Ordinary);
                     if (player.RemDisc(DiscType.Boring)) types.Add(DiscType.Boring);
                     if (player.RemDisc(DiscType.Magnetic)) types.Add(DiscType.Magnetic);
-                    t = types[rng.Next(types.Count)];
-                    if (t == DiscType.Boring)
+                    t = types[rng.Next(types.Count)]; //randomly selecting a disc
+                    
+                    if (t == DiscType.Boring) //boring can act on any columns
                     {
-                        chosen = rng.Next(gameAlgo.Columns);
+                        AI_choice = rng.Next(gameAlgo.Columns); //randomly selecting columnns (all are eligible)
                     }
                     else
                     {
+                        // only non full columns allowed for other discs
                         var cols = new List<int>();
                         for (int c = 0; c < gameAlgo.Columns; c++)
                         {
                             if (gameAlgo.Board[gameAlgo.Rows - 1, c] == ' ') cols.Add(c);
                         }
-                        if (cols.Count == 0) return;
-                        chosen = cols[rng.Next(cols.Count)];
+                        
+                        // if all cols are full
+                        if (cols.Count == 0) 
+                            return;
+                        
+                        AI_choice = cols[rng.Next(cols.Count)]; //selecting one from eligible
                     }
                 }
 
-                winner = gameAlgo.DiscFalls(player, t, chosen);
+                winner = gameAlgo.DiscFalls(player, t, AI_choice);
             }
+            // Player turn
             else
             {
                 DiscType type;
                 int column;
+                
+                // prompting for valid input
                 while (true)
                 {
-                    Console.WriteLine("Enter move (O# /B# /M# eg- O1, M7) or 'save' or 'help':");
+                    Console.WriteLine(
+                        $"Player {(int)player.Id + 1}'s turn ({(player.Id == PlayerId.One ? '@' : '#')}): " +
+                        "Enter move (O# /B# /M# eg- O1, M7) or 'save' or 'help':"
+                    );
                     try
                     {
                         string input = Console.ReadLine();
                         if (input == null) continue;
-                        input = input.Trim();
+                        input = input.Trim().ToLower();
                         if (input == "save")
                         {
                             try
                             {
                                 gameAlgo.Save(SaveFile);
-                                Console.WriteLine($"✔ Game saved as {SaveFile}.");
+                                Console.WriteLine($"  Game saved as {SaveFile}.");
                             }
                             catch (Exception)
                             {
-                                Console.WriteLine("⚠ Error: Could not save game. Please try again.");
+                                Console.WriteLine("!!!  Error: Could not save game. Please try again. !!!");
                             }
                             continue;
                         }
+                        
                         if (input == "help")
                         {
                             PrintHelp();
                             continue;
                         }
-                        if (input == "exit") return;
+                        
+                        if (input == "exit") 
+                            return;
+                        //validating..
                         if (input.Length < 2)
                         {
                             Console.WriteLine("Invalid input");
                             continue;
                         }
+                        //validating..
                         char typeChar = input[0];
                         if (!int.TryParse(input.Substring(1), out int colInput))
                         {
                             Console.WriteLine("Invalid column");
                             continue;
                         }
+                        //validating..
                         char up = char.ToUpperInvariant(typeChar);
                         DiscType t;
                         if (up == 'O' || typeChar == '0') t = DiscType.Ordinary;
@@ -198,17 +226,22 @@ class Program
                             Console.WriteLine("Invalid disc type. Use O, B, or M.");
                             continue;
                         }
-                        int col = colInput - 1;
+                        
+                        int col = colInput - 1; //because my index start with 0 not 1
+                        
+                        //validating.. (bound check)
                         if (col < 0 || col >= gameAlgo.Columns)
                         {
-                            Console.WriteLine($"⚠️ Invalid column. Please enter a number between 1 and {gameAlgo.Columns}.");
+                            Console.WriteLine($"!!! ️ Invalid column. Please enter a number between 1 and {gameAlgo.Columns}.");
                             continue;
                         }
+                        // only boring is allowed on a full column
                         if (gameAlgo.Board[gameAlgo.Rows - 1, col] != ' ' && t != DiscType.Boring)
                         {
                             Console.WriteLine("!!!! That column is full. Choose another column !!!!");
                             continue;
                         }
+                        // inventory check
                         if (!player.RemDisc(t))
                         {
                             Console.WriteLine($"!!!! You have no {t.ToString().ToUpperInvariant()} discs left. Choose a disc type you still have !!!!");
@@ -218,12 +251,13 @@ class Program
                         column = col;
                         break;
                     }
+                    //anything unexpected!
                     catch (Exception)
                     {
-                        Console.WriteLine("⚠ Error: Invalid input. Please try again.");
+                        Console.WriteLine("!!!  Error: Invalid input. Please try again.");
                     }
                 }
-                winner = gameAlgo.DiscFalls(player, type, column);
+                winner = gameAlgo.DiscFalls(player, type, column); //this method checks for wins and returns the winner
             }
 
             RenderGrid.PrintBoard(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
@@ -249,6 +283,7 @@ class Program
     {
         Player p1 = gameAlgo.CurrentPlayer.Id == PlayerId.One ? gameAlgo.CurrentPlayer : gameAlgo.OtherPlayer;
         Player p2 = gameAlgo.CurrentPlayer.Id == PlayerId.Two ? gameAlgo.CurrentPlayer : gameAlgo.OtherPlayer;
+        
         Console.WriteLine($"Player 1 (@) — Ordinary: {p1.Ordinary}, Boring: {p1.Boring}, Magnetic: {p1.Magnetic}");
         Console.WriteLine($"Player 2 (#) — Ordinary: {p2.Ordinary}, Boring: {p2.Boring}, Magnetic: {p2.Magnetic}");
     }

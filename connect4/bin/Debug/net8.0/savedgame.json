@@ -1,0 +1,30 @@
+{
+  "Rows": 6,
+  "Columns": 7,
+  "Board": [
+    " @#@   ",
+    "       ",
+    "       ",
+    "       ",
+    "       ",
+    "       "
+  ],
+  "Players": [
+    {
+      "Id": 0,
+      "IsComputer": false,
+      "Ordinary": 15,
+      "Boring": 2,
+      "Magnetic": 2
+    },
+    {
+      "Id": 1,
+      "IsComputer": false,
+      "Ordinary": 16,
+      "Boring": 2,
+      "Magnetic": 2
+    }
+  ],
+  "CurrentPlayer": 1,
+  "Mode": 0
+}
