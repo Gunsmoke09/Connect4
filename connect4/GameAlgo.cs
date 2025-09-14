@@ -1,5 +1,6 @@
 
-using System.Text.Json; 
+using System;
+using System.Text.Json;
 
 namespace Connect4
 {
@@ -9,6 +10,7 @@ namespace Connect4
         public int Columns { get; }
         public GameMode Mode { get; }
         private readonly char[,] board;
+        public int ConnectN { get; }
         
         private readonly Player[] players = new Player[2]; 
         public int CurrentPlayerNumber = 0;
@@ -20,6 +22,7 @@ namespace Connect4
             Columns = columns;
             Mode = mode;
             board = RenderGrid.GenBoard(Rows, Columns);
+            ConnectN = Math.Max(4, (int)Math.Floor(rows * columns * 0.1));
 
             int total_cells = rows * columns;
             int discsPerplayer = total_cells / 2;
@@ -186,7 +189,7 @@ namespace Connect4
                 if (match) count++; else break;
                 r--;
             }
-            if (count >= 4) return true; 
+            if (count >= ConnectN) return true; 
             // horizontal check RTL
             count = 1;
             int c = column + 1;
@@ -206,7 +209,7 @@ namespace Connect4
                 if (match) count++; else break;
                 c--;
             }
-            if (count >= 4) return true;
+            if (count >= ConnectN) return true;
         // diag c down-right
             count = 1;
             r = row + 1;
@@ -231,7 +234,7 @@ namespace Connect4
                 c--;
             }
             // diagg c down left
-            if (count >= 4) return true;
+            if (count >= ConnectN) return true;
 
             count = 1;
             r = row + 1;
@@ -255,7 +258,7 @@ namespace Connect4
                 r--;
                 c++;
             }
-            return count >= 4;
+            return count >= ConnectN;
         }
 
         public bool BoardFull()
