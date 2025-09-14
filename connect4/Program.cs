@@ -169,7 +169,7 @@ class Program
                 {
                     Console.WriteLine(
                         $"Player {(int)player.Id + 1}'s turn ({(player.Id == PlayerId.One ? '@' : '#')}): " +
-                        "Enter move (O# /B# /M# eg- O1, M7) or 'save' or 'help':"
+                        "type 'save' to save game or 'help' for help menu\n Enter move (O# /B# /M#) eg: O5, B2':"
                     );
                     try
                     {

@@ -71,7 +71,7 @@ namespace Connect4
                 //disc won;t fall unless it is a boring disc
                 if (type != DiscType.Boring)
                     return null;
-                row = Rows - 1; //if it is boring then we just remove the top disc and insert it there
+                row = Rows - 1; //if it is boring then I just remove the top disc and insert it there
             }
 
             char discChar = ' '; //need to be initialised before accessing
