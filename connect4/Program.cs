@@ -88,7 +88,7 @@ class Program
         var rng = new Random();
         RenderGrid.PrintBoard(gameAlgo.Board, gameAlgo.Rows, gameAlgo.Columns);
         PrintStatus(gameAlgo);
-        Console.WriteLine($"── Player {(int)gameAlgo.CurrentPlayer.Id + 1}'s Turn (Discs: O={gameAlgo.CurrentPlayer.Ordinary}, B={gameAlgo.CurrentPlayer.Boring}, M={gameAlgo.CurrentPlayer.Magnetic}) ──");
+        Console.WriteLine("-------------");
 
         while (true)
         {
@@ -151,7 +151,7 @@ class Program
                 int column;
                 while (true)
                 {
-                    Console.WriteLine("Enter move (e.g., O4, B3, M5) or 'save' or 'help':");
+                    Console.WriteLine("Enter move (O# /B# /M# eg- O1, M7) or 'save' or 'help':");
                     try
                     {
                         string input = Console.ReadLine();
@@ -239,7 +239,8 @@ class Program
             Console.WriteLine("------------------");
             gameAlgo.CurrentPlayerNumber = 1 - gameAlgo.CurrentPlayerNumber;
             PrintStatus(gameAlgo);
-            Console.WriteLine($"── Player {(int)gameAlgo.CurrentPlayer.Id + 1}'s Turn (Discs: O={gameAlgo.CurrentPlayer.Ordinary}, B={gameAlgo.CurrentPlayer.Boring}, M={gameAlgo.CurrentPlayer.Magnetic}) ──");
+            Console.WriteLine("------------------");
+            
         }
     }
 
@@ -259,9 +260,9 @@ class Program
         Console.WriteLine("│ O# or 0#│ Drop ordinary disc in column #           │");
         Console.WriteLine("│ B#      │ Boring disc in column # (removes column) │");
         Console.WriteLine("│ M#      │ Magnetic disc in column # (lifts own)    │");
-        Console.WriteLine("│ save    │ Save game                                 │");
-        Console.WriteLine("│ help    │ Show this help                            │");
-        Console.WriteLine("│ exit    │ Quit                                       │");
+        Console.WriteLine("│ save    │ Save game                                │");
+        Console.WriteLine("│ help    │ Show this help                           │");
+        Console.WriteLine("│ exit    │ Quit                                     │");
         Console.WriteLine("└─────────┴──────────────────────────────────────────┘");
     }
 
