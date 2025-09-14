@@ -16,7 +16,7 @@ namespace Connect4
             Boring = boring;
             Magnetic = magnetic;
         }
-
+        
         public bool RemDisc(DiscType type)
         {
             bool result = false;
@@ -26,7 +26,9 @@ namespace Connect4
             }
             else if (type == DiscType.Boring)
             {
-                if (Boring > 0) result = true; else result = result;
+                if (Boring > 0) result = true; 
+                else 
+                    result = result;
             }
             else if (type == DiscType.Magnetic)
             {

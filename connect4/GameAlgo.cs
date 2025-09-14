@@ -1,5 +1,5 @@
 
-using System.Text.Json; //mainly used for saving the game
+using System.Text.Json; 
 
 namespace Connect4
 {
@@ -11,7 +11,7 @@ namespace Connect4
         private readonly char[,] board;
         
         private readonly Player[] players = new Player[2]; 
-        public int CurrentPlayerIndex = 0;
+        public int CurrentPlayerNumber = 0;
         private readonly Random rng = new Random();
 
         public GameAlgo(int rows, int columns, GameMode mode)
@@ -32,7 +32,7 @@ namespace Connect4
         {
             get
             {
-                return players[CurrentPlayerIndex];
+                return players[CurrentPlayerNumber];
             }
         }
 
@@ -40,7 +40,7 @@ namespace Connect4
         {
             get
             {
-                return players[1 - CurrentPlayerIndex];
+                return players[1 - CurrentPlayerNumber]; //this formula always returns the other player
             }
         }
 
@@ -156,6 +156,7 @@ namespace Connect4
             int r = row + 1;
             while (r < Rows)
             {
+                //currently it is not checking beyond the first one, it will not work for magnetic special case
                 char ch = board[r, column];
                 bool match = player == PlayerId.One ? ch == '@' : ch == '#';
                 if (match) 
@@ -164,6 +165,7 @@ namespace Connect4
                     break;
                 r++;
             }
+            // vertical check up to down
             r = row - 1;
             while (r >= 0)
             {
@@ -172,8 +174,8 @@ namespace Connect4
                 if (match) count++; else break;
                 r--;
             }
-            if (count >= 4) return true;
-
+            if (count >= 4) return true; 
+            // horizontal check RTL
             count = 1;
             int c = column + 1;
             while (c < Columns)
@@ -183,6 +185,7 @@ namespace Connect4
                 if (match) count++; else break;
                 c++;
             }
+            //hc ltr
             c = column - 1;
             while (c >= 0)
             {
@@ -192,7 +195,7 @@ namespace Connect4
                 c--;
             }
             if (count >= 4) return true;
-
+        // diag c down-right
             count = 1;
             r = row + 1;
             c = column + 1;
@@ -204,6 +207,7 @@ namespace Connect4
                 r++;
                 c++;
             }
+            // diag c up left
             r = row - 1;
             c = column - 1;
             while (r >= 0 && c >= 0)
@@ -214,6 +218,7 @@ namespace Connect4
                 r--;
                 c--;
             }
+            // diagg c down left
             if (count >= 4) return true;
 
             count = 1;
@@ -227,12 +232,13 @@ namespace Connect4
                 r++;
                 c--;
             }
+            // diag c up right
             r = row - 1;
             c = column + 1;
             while (r >= 0 && c < Columns)
             {
                 char ch = board[r, c];
-                bool match = player == PlayerId.One ? ch == '@' || ch == 'B' || ch == 'M' : ch == '#' || ch == 'b' || ch == 'm';
+                bool match = player == PlayerId.One ? ch == '@' : ch == '#';
                 if (match) count++; else break;
                 r--;
                 c++;
@@ -243,27 +249,29 @@ namespace Connect4
         public bool BoardFull()
         {
             for (int c = 0; c < Columns; c++)
-                if (board[Rows - 1, c] == ' ') return false;
+                if (board[Rows - 1, c] == ' ')
+                    return false;
             return true;
         }
 
         public void Save(string filename)
         {
-            string[] boardStrings = new string[Rows];
+            
+            string[] oneRow = new string[Rows];
             for (int r = 0; r < Rows; r++)
             {
-                char[] chars = new char[Columns];
+                char[] chars = new char[Columns]; //creating array of characters
                 for (int c = 0; c < Columns; c++)
                 {
-                    chars[c] = board[r, c];
+                    chars[c] = board[r, c]; //storing each element of the board in the array of characters
                 }
-                boardStrings[r] = new string(chars);
+                oneRow[r] = new string(chars); //using that array as a row entry for array of strings
             }
 
-            PlayerState[] playerStates = new PlayerState[2];
+            PlayerStatusBar[] playerStatus = new PlayerStatusBar[2];
             for (int i = 0; i < 2; i++)
             {
-                playerStates[i] = new PlayerState
+                playerStatus[i] = new PlayerStatusBar
                 {
                     Id = players[i].Id,
                     IsComputer = players[i].IsComputer,
@@ -273,13 +281,13 @@ namespace Connect4
                 };
             }
 
-            var state = new GameState
+            var state = new GameStatus
             {
                 Rows = Rows,
                 Columns = Columns,
-                Board = boardStrings,
-                Players = playerStates,
-                CurrentPlayer = CurrentPlayerIndex,
+                Board = oneRow,
+                Players = playerStatus,
+                CurrentPlayer = CurrentPlayerNumber,
                 Mode = Mode
             };
             var json = JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true });
@@ -289,8 +297,9 @@ namespace Connect4
         public static GameAlgo Load(string filename)
         {
             var json = File.ReadAllText(filename);
-            var state = JsonSerializer.Deserialize<GameState>(json);
-            if (state == null) throw new Exception("Invalid save file");
+            var state = JsonSerializer.Deserialize<GameStatus>(json);
+            if (state == null) 
+                throw new Exception("Invalid save file");
             var game = new GameAlgo(state.Rows, state.Columns, state.Mode);
             for (int r = 0; r < state.Rows; r++)
             {
@@ -308,7 +317,7 @@ namespace Connect4
                     state.Players[i].Boring,
                     state.Players[i].Magnetic);
             }
-            game.CurrentPlayerIndex = state.CurrentPlayer;
+            game.CurrentPlayerNumber = state.CurrentPlayer;
             return game;
         }
 

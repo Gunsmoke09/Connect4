@@ -1,6 +1,6 @@
 namespace Connect4
 {
-    public class PlayerState
+    public class PlayerStatusBar
     {
         public PlayerId Id { get; set; }
         public bool IsComputer { get; set; }

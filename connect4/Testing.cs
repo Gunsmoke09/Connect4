@@ -34,7 +34,7 @@ namespace Connect4
                     Console.WriteLine("Draw.");
                     return;
                 }
-                game.CurrentPlayerIndex = 1 - game.CurrentPlayerIndex;
+                game.CurrentPlayerNumber = 1 - game.CurrentPlayerNumber;
             }
             RenderGrid.PrintBoard(game.Board, game.Rows, game.Columns);
         }
