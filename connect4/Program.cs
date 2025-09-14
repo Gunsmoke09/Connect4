@@ -168,8 +168,8 @@ class Program
                 while (true)
                 {
                     Console.WriteLine(
-                        $"Player {(int)player.Id + 1}'s turn ({(player.Id == PlayerId.One ? '@' : '#')}): " +
-                        "type 'save' to save game or 'help' for help menu\n Enter move (O# /B# /M#) eg: O5, B2':"
+                        "Type 'save' to save game or 'help' for help menu\nEnter move (O# /B# /M#) eg: O5, B2':"
+                        + $"Player {(int)player.Id + 1}'s turn ({(player.Id == PlayerId.One ? '@' : '#')}): "
                     );
                     try
                     {
