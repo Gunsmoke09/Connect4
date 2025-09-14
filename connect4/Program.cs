@@ -207,12 +207,12 @@ class Program
                 }
                 if (gameAlgo.Board[gameAlgo.Rows - 1, col] != ' ' && t != DiscType.Boring)
                 {
-                    Console.WriteLine("⚠️ That column is full. Choose another column.");
+                    Console.WriteLine("!!!! That column is full. Choose another column !!!!");
                     continue;
                 }
                 if (!player.RemDisc(t))
                 {
-                    Console.WriteLine($"⚠️ You have no {t.ToString().ToUpperInvariant()} discs left. Choose a disc type you still have.");
+                    Console.WriteLine($"!!!! You have no {t.ToString().ToUpperInvariant()} discs left. Choose a disc type you still have !!!!");
                     continue;
                 }
                 type = t;

@@ -87,7 +87,8 @@ namespace Connect4
 
             board[row, column] = discChar; //placing that disc in the respective cell
             player.UseDisc(type); //subtracting the inventory of discs from the player
-            if (wantsPrint) RenderGrid.PrintBoard(board, Rows, Columns); //if we want to print the grid or not
+            if (wantsPrint) //if we want to print the grid or not
+                RenderGrid.PrintBoard(board, Rows, Columns); 
 
             if (type == DiscType.Boring)
             {
@@ -104,13 +105,14 @@ namespace Connect4
                                  owner = PlayerId.Two;
                         players[(int)owner].Ordinary++; //only ordinary is returned, specials discs are not returned
                     }
-                    board[r, column] = ' ';
+                    board[r, column] = ' ';  //replacing each with blank spaces
                 }
-                board[row, column] = ' ';
-                char boringChar = player.Id == PlayerId.One ? 'B' : 'b';
-                board[0, column] = boringChar;
-                if (wantsPrint) RenderGrid.PrintBoard(board, Rows, Columns);
-                board[0, column] = player.Id == PlayerId.One ? '@' : '#';
+                board[row, column] = ' '; // it was where B landed now it is cleared for B to go down
+
+                board[0, column] = 'B';
+                if (wantsPrint) RenderGrid.PrintBoard(board, Rows, Columns); //prints with the 'B' disc at the bottom
+                
+                board[0, column] = player.Id == PlayerId.One ? '@' : '#'; //now the 'B' disc is converted to ordinary disc
                 row = 0;
             }
             else if (type == DiscType.Magnetic)
@@ -119,8 +121,13 @@ namespace Connect4
                 for (int r = row - 1; r >= 0; r--)
                 {
                     char ch = board[r, column];
-                    bool mine = player.Id == PlayerId.One ? (ch == '@' || ch == 'B' || ch == 'M') : (ch == '#' || ch == 'b' || ch == 'm');
-                    if (mine)
+                    //finding the respective disc
+                    if (player.Id == PlayerId.One && ch == '@')
+                    {
+                        target = r;
+                        break;
+                    }
+                    if (player.Id == PlayerId.Two && ch == '#')
                     {
                         target = r;
                         break;
@@ -128,6 +135,7 @@ namespace Connect4
                 }
                 if (target != -1 && target < row - 1)
                 {
+                    //algorithm for magnet
                     char below = board[target, column];
                     char above = board[target + 1, column];
                     board[target, column] = above;
@@ -135,10 +143,11 @@ namespace Connect4
                 }
                 if (wantsPrint) RenderGrid.PrintBoard(board, Rows, Columns);
                 board[row, column] = player.Id == PlayerId.One ? '@' : '#';
+                //printing the grid then changing the special disc back to the ordinary
             }
 
-            bool win = CheckWin(row, column, player.Id);
-            return win;
+
+            return (CheckWin(row, column, player.Id));
         }
 
         public bool CheckWin(int row, int column, PlayerId player)
@@ -148,15 +157,18 @@ namespace Connect4
             while (r < Rows)
             {
                 char ch = board[r, column];
-                bool match = player == PlayerId.One ? ch == '@' || ch == 'B' || ch == 'M' : ch == '#' || ch == 'b' || ch == 'm';
-                if (match) count++; else break;
+                bool match = player == PlayerId.One ? ch == '@' : ch == '#';
+                if (match) 
+                    count++; 
+                else 
+                    break;
                 r++;
             }
             r = row - 1;
             while (r >= 0)
             {
                 char ch = board[r, column];
-                bool match = player == PlayerId.One ? ch == '@' || ch == 'B' || ch == 'M' : ch == '#' || ch == 'b' || ch == 'm';
+                bool match = player == PlayerId.One ? ch == '@' : ch == '#';
                 if (match) count++; else break;
                 r--;
             }
